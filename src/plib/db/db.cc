@@ -658,10 +658,12 @@ DB_FILE* db_fopen(const char* filename, const char* mode)
     }
 
     if (mode_value == 0) {
+        debug_printf("db_fopen: mode is write, adding hash entry for %s\n", path);
         return NULL;
     }
 
     if (current_database->datafile == NULL) {
+        debug_printf("db_fopen: no datafile set\n");
         return NULL;
     }
 
@@ -672,14 +674,17 @@ DB_FILE* db_fopen(const char* filename, const char* mode)
     compat_strupr(path);
 
     if (db_find_dir_entry(path, &de) == -1) {
+        debug_printf("db_fopen: db_find_dir_entry failed for %s\n", path);
         return NULL;
     }
 
     if (current_database->stream == NULL) {
+        debug_printf("db_fopen: current_database->stream is NULL\n");
         return NULL;
     }
 
     if (fseek(current_database->stream, de.offset, SEEK_SET) != 0) {
+        debug_printf("db_fopen: fseek failed for %s\n", path);
         return NULL;
     }
 
@@ -2550,7 +2555,18 @@ static int db_find_dir_entry(char* path, dir_entry* de)
 
     normalized_path = path;
 
-    if (current_database->datafile == NULL || path == NULL || de == NULL) {
+    if (current_database->datafile == NULL) {
+        debug_printf("ERROR: db_find_dir_entry: current_database->datafile is NULL\n");
+        return -1;
+    }
+
+    if (path == NULL) {
+        debug_printf("ERROR: db_find_dir_entry: path is NULL\n");
+        return -1;
+    }
+
+    if (de == NULL) {
+        debug_printf("ERROR: db_find_dir_entry: de is NULL\n");
         return -1;
     }
 
@@ -2580,6 +2596,7 @@ static int db_find_dir_entry(char* path, dir_entry* de)
         if (pos >= 0) {
             normalized_path[pos] = '\\';
         }
+        debug_printf("ERROR: db_find_dir_entry: assoc_search1 failed for path: %s\n", normalized_path);
         return -1;
     }
 
@@ -2588,6 +2605,7 @@ static int db_find_dir_entry(char* path, dir_entry* de)
         if (pos >= 0) {
             normalized_path[pos] = '\\';
         }
+        debug_printf("ERROR: db_find_dir_entry: assoc_search2 failed for entry: %s\n", normalized_path + pos + 1);
         return -1;
     }
 
