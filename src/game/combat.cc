@@ -4579,7 +4579,7 @@ void combat_attack_this(Object* target)
     if (!isInCombat()) {
         STRUCT_664980 stru;
         stru.attacker = obj_dude;
-        stru.defender = a1;
+        stru.defender = target;
         stru.actionPointsBonus = 0;
         stru.accuracyBonus = 0;
         stru.damageBonus = 0;
