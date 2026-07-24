@@ -4500,9 +4500,9 @@ bool combat_to_hit(Object* target, int* accuracy)
 }
 
 // 0x423D98
-void combat_attack_this(Object* a1)
+void combat_attack_this(Object* target)
 {
-    if (a1 == NULL) {
+    if (target == NULL) {
         return;
     }
 
@@ -4521,7 +4521,7 @@ void combat_attack_this(Object* a1)
     char formattedText[80];
     const char* sfx;
 
-    int rc = combat_check_bad_shot(obj_dude, a1, hitMode, aiming);
+    int rc = combat_check_bad_shot(obj_dude, target, hitMode, aiming);
     switch (rc) {
     case COMBAT_BAD_SHOT_NO_AMMO:
         item = item_hit_with(obj_dude, hitMode);
@@ -4591,7 +4591,7 @@ void combat_attack_this(Object* a1)
     }
 
     if (!aiming) {
-        combat_attack(obj_dude, a1, hitMode, HIT_LOCATION_UNCALLED);
+        combat_attack(obj_dude, target, hitMode, HIT_LOCATION_UNCALLED);
         return;
     }
 
@@ -4600,8 +4600,8 @@ void combat_attack_this(Object* a1)
     }
 
     int hitLocation;
-    if (get_called_shot_location(a1, &hitLocation, hitMode) != -1) {
-        combat_attack(obj_dude, a1, hitMode, hitLocation);
+    if (get_called_shot_location(target, &hitLocation, hitMode) != -1) {
+        combat_attack(obj_dude, target, hitMode, hitLocation);
     }
 }
 
