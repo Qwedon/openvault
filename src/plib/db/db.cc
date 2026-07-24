@@ -17,6 +17,7 @@
 #include "platform_compat.h"
 #include "plib/assoc/assoc.h"
 #include "plib/db/lzss.h"
+#include "plib/gnw/debug.h"
 
 namespace fallout {
 
