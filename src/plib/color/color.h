@@ -39,7 +39,7 @@ void colorInitIO(ColorOpenFunc* openProc, ColorReadFunc* readProc, ColorCloseFun
 void colorSetNameMangler(ColorNameMangleFunc* c);
 Color colorMixAdd(Color a, Color b);
 Color colorMixMul(Color a, Color b);
-int calculateColor(int a1, int a2);
+int calculateColor(int intensity, Color color);
 Color RGB2Color(ColorRGB c);
 int Color2RGB(Color c);
 void fadeSystemPalette(unsigned char* oldPalette, unsigned char* newPalette, int steps);
