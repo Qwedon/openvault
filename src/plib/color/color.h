@@ -41,7 +41,7 @@ Color colorMixAdd(Color a, Color b);
 Color colorMixMul(Color a, Color b);
 int calculateColor(int a1, int a2);
 Color RGB2Color(ColorRGB c);
-int Color2RGB(int a1);
+int Color2RGB(Color c);
 void fadeSystemPalette(unsigned char* oldPalette, unsigned char* newPalette, int steps);
 void colorSetFadeBkFunc(fade_bk_func* callback);
 void setBlackSystemPalette();
