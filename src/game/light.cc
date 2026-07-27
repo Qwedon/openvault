@@ -46,12 +46,12 @@ void light_set_ambient(int new_ambient_light, bool refresh_screen)
 
     normalized = new_ambient_light + perk_level(PERK_NIGHT_VISION) * LIGHT_LEVEL_NIGHT_VISION_BONUS;
 
-    if (normalized < LIGHT_LEVEL_MIN) {
-        normalized = LIGHT_LEVEL_MIN;
+    if (normalized < LIGHT_INTENSITY_MIN) {
+        normalized = LIGHT_INTENSITY_MIN;
     }
 
-    if (normalized > LIGHT_LEVEL_MAX) {
-        normalized = LIGHT_LEVEL_MAX;
+    if (normalized > LIGHT_INTENSITY_MAX) {
+        normalized = LIGHT_INTENSITY_MAX;
     }
 
     old_ambient_light = ambient_light;
