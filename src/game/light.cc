@@ -8,7 +8,7 @@
 namespace fallout {
 
 // 0x5057E0
-static int ambient_light = LIGHT_LEVEL_MAX;
+static int ambient_light = LIGHT_INTENSITY_MAX;
 
 // 0x59CF1C
 static int tile_intensity[ELEVATION_COUNT][HEX_GRID_SIZE];
@@ -90,8 +90,8 @@ int light_get_tile(int elevation, int tile)
     }
 
     intensity = tile_intensity[elevation][tile];
-    if (intensity >= LIGHT_LEVEL_MAX) {
-        intensity = LIGHT_LEVEL_MAX;
+    if (intensity >= LIGHT_INTENSITY_MAX) {
+        intensity = LIGHT_INTENSITY_MAX;
     }
 
     return intensity;
