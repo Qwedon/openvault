@@ -181,9 +181,9 @@ Color colorMixMul(Color a, Color b)
 }
 
 // 0x4BFE74
-int calculateColor(int a1, int a2)
+int calculateColor(int intensity, Color color)
 {
-    return intensityColorTable[a2][a1 >> 9];
+    return intensityColorTable[color][intensity / 512];
 }
 
 // 0x4BFE8C
@@ -483,13 +483,13 @@ bool loadColorTable(const char* path)
 
     if (type == 'NEWC') {
         // NOTE: Uninline.
-        colorRead(handle, intensityColorTable, 0x10000);
+        colorRead(handle, intensityColorTable, sizeof(intensityColorTable));
 
         // NOTE: Uninline.
-        colorRead(handle, colorMixAddTable, 0x10000);
+        colorRead(handle, colorMixAddTable, sizeof(colorMixAddTable));
 
         // NOTE: Uninline.
-        colorRead(handle, colorMixMulTable, 0x10000);
+        colorRead(handle, colorMixMulTable, sizeof(colorMixMulTable));
     } else {
         setIntensityTables();
 
