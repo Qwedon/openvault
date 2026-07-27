@@ -316,7 +316,7 @@ static void setIntensityTableColor(int cc)
         int lighterG = g + (((0x1F - g) * shift) >> 16);
         int lighterB = b + (((0x1F - b) * shift) >> 16);
         int lighterColor = (lighterR << 10) | (lighterG << 5) | lighterB;
-        intensityColorTable[cc][128 + index] = colorTable[lighterColor];
+        intensityColorTable[cc][0x7F + index] = colorTable[lighterColor];
 
         shift += 512;
     }
