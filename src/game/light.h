@@ -7,7 +7,7 @@ namespace fallout {
 #define LIGHT_INTENSITY_MIN (LIGHT_INTENSITY_MAX / 4)
 
 // 10% of max light per "Night Vision" rank
-#define LIGHT_LEVEL_NIGHT_VISION_BONUS (LIGHT_LEVEL_MAX / 10)
+#define LIGHT_LEVEL_NIGHT_VISION_BONUS (LIGHT_INTENSITY_MAX / 10)
 
 typedef void(AdjustLightIntensityProc)(int elevation, int tile, int intensity);
 
