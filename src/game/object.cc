@@ -1763,8 +1763,8 @@ int obj_get_visible_light(Object* obj)
     }
 
     if (lightIntensity >= lightLevel) {
-        if (lightIntensity > LIGHT_LEVEL_MAX) {
-            lightIntensity = LIGHT_LEVEL_MAX;
+        if (lightIntensity > LIGHT_INTENSITY_MAX) {
+            lightIntensity = LIGHT_INTENSITY_MAX;
         }
     } else {
         lightIntensity = lightLevel;
