@@ -2916,7 +2916,7 @@ int inven_wield(Object* critter, Object* item, int a3)
                 int lightIntensity;
                 int lightDistance;
                 if (critter == obj_dude) {
-                    lightIntensity = LIGHT_LEVEL_MAX;
+                    lightIntensity = LIGHT_INTENSITY_MAX;
                     lightDistance = 4;
                 } else {
                     Proto* proto;
