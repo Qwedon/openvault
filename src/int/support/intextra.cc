@@ -1825,14 +1825,14 @@ static void op_set_light_level(Program* program)
     // Maps light level to light intensity.
     //
     // Middle value is mapped one-to-one which corresponds to 50% light level
-    // (cavern lighting). Light levels above (51-100%) and below (0-49) is
+    // (cavern lighting). Light levels above (51-100%) and below (0-49%) is
     // calculated as percentage from two adjacent light values.
     //
     // 0x44B570
-    static const int dword_453F90[3] = {
-        0x4000,
-        0xA000,
-        0x10000,
+    static const int intensities[3] = {
+        LIGHT_INTENSITY_MIN,
+        (LIGHT_INTENSITY_MIN + LIGHT_INTENSITY_MAX) / 2,
+        LIGHT_INTENSITY_MAX,
     };
 
     int data = programStackPopInteger(program);
@@ -1840,15 +1840,15 @@ static void op_set_light_level(Program* program)
     int lightLevel = data;
 
     if (data == 50) {
-        light_set_ambient(dword_453F90[1], true);
+        light_set_ambient(intensities[1], true);
         return;
     }
 
     int lightIntensity;
     if (data > 50) {
-        lightIntensity = dword_453F90[1] + data * (dword_453F90[2] - dword_453F90[1]) / 100;
+        lightIntensity = intensities[1] + data * (intensities[2] - intensities[1]) / 100;
     } else {
-        lightIntensity = dword_453F90[0] + data * (dword_453F90[1] - dword_453F90[0]) / 100;
+        lightIntensity = intensities[0] + data * (intensities[1] - intensities[0]) / 100;
     }
 
     light_set_ambient(lightIntensity, true);
