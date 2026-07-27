@@ -193,15 +193,13 @@ Color RGB2Color(ColorRGB c)
 }
 
 // 0x4BFEA0
-int Color2RGB(int a1)
+int Color2RGB(Color c)
 {
-    int v1, v2, v3;
+    int r = cmap[3 * c] >> 1;
+    int g = cmap[3 * c + 1] >> 1;
+    int b = cmap[3 * c + 2] >> 1;
 
-    v1 = cmap[3 * a1] >> 1;
-    v2 = cmap[3 * a1 + 1] >> 1;
-    v3 = cmap[3 * a1 + 2] >> 1;
-
-    return (((v1 << 5) | v2) << 5) | v3;
+    return (r << 10) | (g << 5) | b;
 }
 
 // Performs animated palette transition.
@@ -299,28 +297,28 @@ void getSystemPaletteEntry(int entry, unsigned char* r, unsigned char* g, unsign
 }
 
 // 0x4C00FC
-static void setIntensityTableColor(int a1)
+static void setIntensityTableColor(int cc)
 {
-    int v1, v2, v3, v4, v5, v6, v7, v8, v9;
-
-    v5 = 0;
+    int shift = 0;
 
     for (int index = 0; index < 128; index++) {
-        v1 = (Color2RGB(a1) & 0x7C00) >> 10;
-        v2 = (Color2RGB(a1) & 0x3E0) >> 5;
-        v3 = (Color2RGB(a1) & 0x1F);
+        int r = (Color2RGB(cc) & 0x7C00) >> 10;
+        int g = (Color2RGB(cc) & 0x3E0) >> 5;
+        int b = (Color2RGB(cc) & 0x1F);
 
-        v4 = (((v1 * v5) >> 16) << 10) | (((v2 * v5) >> 16) << 5) | ((v3 * v5) >> 16);
-        intensityColorTable[a1][index] = colorTable[v4];
+        int darkerR = ((r * shift) >> 16);
+        int darkerG = ((g * shift) >> 16);
+        int darkerB = ((b * shift) >> 16);
+        int darkerColor = (darkerR << 10) | (darkerG << 5) | darkerB;
+        intensityColorTable[cc][index] = colorTable[darkerColor];
 
-        v6 = v1 + (((0x1F - v1) * v5) >> 16);
-        v7 = v2 + (((0x1F - v2) * v5) >> 16);
-        v8 = v3 + (((0x1F - v3) * v5) >> 16);
+        int lighterR = r + (((0x1F - r) * shift) >> 16);
+        int lighterG = g + (((0x1F - g) * shift) >> 16);
+        int lighterB = b + (((0x1F - b) * shift) >> 16);
+        int lighterColor = (lighterR << 10) | (lighterG << 5) | lighterB;
+        intensityColorTable[cc][128 + index] = colorTable[lighterColor];
 
-        v9 = (v6 << 10) | (v7 << 5) | v8;
-        intensityColorTable[a1][0x7F + index + 1] = colorTable[v9];
-
-        v5 += 0x200;
+        shift += 512;
     }
 }
 
