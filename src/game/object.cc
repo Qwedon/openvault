@@ -2527,25 +2527,24 @@ void translucent_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeigh
 }
 
 // 0x47D758
-void dark_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destX, int destY, int destPitch, int light)
+void dark_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destX, int destY, int destPitch, int intensity)
 {
     unsigned char* sp = src;
     unsigned char* dp = dest + destPitch * destY + destX;
 
     int srcStep = srcPitch - srcWidth;
     int destStep = destPitch - srcWidth;
-    // TODO: Name might be confusing.
-    int lightModifier = light >> 9;
+    int intensityIndex = intensity / 512;
 
     for (int y = 0; y < srcHeight; y++) {
         for (int x = 0; x < srcWidth; x++) {
-            unsigned char b = *sp;
-            if (b != 0) {
-                if (b < 0xE5) {
-                    b = intensityColorTable[b][lightModifier];
+            unsigned char color = *sp;
+            if (color != 0) {
+                if (color < 0xE5) {
+                    color = intensityColorTable[color][intensityIndex];
                 }
 
-                *dp = b;
+                *dp = color;
             }
 
             sp++;
@@ -2558,11 +2557,11 @@ void dark_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int 
 }
 
 // 0x47D7E4
-void dark_translucent_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destX, int destY, int destPitch, int light, unsigned char* a10, unsigned char* a11)
+void dark_translucent_trans_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destX, int destY, int destPitch, int intensity, unsigned char* a10, unsigned char* a11)
 {
     int srcStep = srcPitch - srcWidth;
     int destStep = destPitch - srcWidth;
-    int lightModifier = light >> 9;
+    int intensityIndex = intensity / 512;
 
     dest += destPitch * destY + destX;
 
@@ -2573,7 +2572,7 @@ void dark_translucent_trans_buf_to_buf(unsigned char* src, int srcWidth, int src
                 unsigned char destByte = *dest;
                 unsigned int index = a11[srcByte] << 8;
                 index = a10[index + destByte];
-                *dest = intensityColorTable[index][lightModifier];
+                *dest = intensityColorTable[index][intensityIndex];
             }
 
             src++;
@@ -2586,26 +2585,24 @@ void dark_translucent_trans_buf_to_buf(unsigned char* src, int srcWidth, int src
 }
 
 // 0x47D898
-void intensity_mask_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destPitch, unsigned char* mask, int maskPitch, int light)
+void intensity_mask_buf_to_buf(unsigned char* src, int srcWidth, int srcHeight, int srcPitch, unsigned char* dest, int destPitch, unsigned char* mask, int maskPitch, int intensity)
 {
     int srcStep = srcPitch - srcWidth;
     int destStep = destPitch - srcWidth;
     int maskStep = maskPitch - srcWidth;
-    light >>= 9;
+    int intensityIndex = intensity / 512;
 
     for (int y = 0; y < srcHeight; y++) {
         for (int x = 0; x < srcWidth; x++) {
-            unsigned char b = *src;
-            if (b != 0) {
-                b = intensityColorTable[b][light];
-                unsigned char m = *mask;
-                if (m != 0) {
-                    unsigned char d = *dest;
-                    int q = intensityColorTable[d][128 - m];
-                    m = intensityColorTable[b][m];
-                    b = colorMixAddTable[m][q];
+            unsigned char color = *src;
+            if (color != 0) {
+                color = intensityColorTable[color][intensityIndex];
+                if (*mask != 0) {
+                    unsigned char v1 = intensityColorTable[*dest][128 - *mask];
+                    unsigned char v2 = intensityColorTable[color][*mask];
+                    color = colorMixAddTable[v2][v1];
                 }
-                *dest = b;
+                *dest = color;
             }
 
             src++;
