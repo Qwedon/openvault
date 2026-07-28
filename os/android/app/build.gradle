@@ -3,6 +3,7 @@ plugins {
 }
 
 android {
+    namespace 'com.alexbatalov.falloutce'
     compileSdk 32
 
     defaultConfig {
