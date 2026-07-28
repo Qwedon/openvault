@@ -318,18 +318,19 @@ bool queue_find(Object* owner, int eventType)
 int queue_process()
 {
     unsigned int time = game_time();
-    int v1 = 0;
+    // TODO: this is 0 or 1, but in some cases -1. Probably needs to be bool.
+    int stopProcess = 0;
 
     while (queue != NULL) {
         QueueListNode* queueListNode = queue;
-        if (time < queueListNode->time || v1 != 0) {
+        if (time < queueListNode->time || stopProcess != 0) {
             break;
         }
 
         queue = queueListNode->next;
 
         EventTypeDescription* eventTypeDescription = &(q_func[queueListNode->type]);
-        v1 = eventTypeDescription->handlerProc(queueListNode->owner, queueListNode->data);
+        stopProcess = eventTypeDescription->handlerProc(queueListNode->owner, queueListNode->data);
 
         if (eventTypeDescription->freeProc != NULL) {
             eventTypeDescription->freeProc(queueListNode->data);
@@ -338,7 +339,7 @@ int queue_process()
         mem_free(queueListNode);
     }
 
-    return v1;
+    return stopProcess;
 }
 
 // 0x490A5C
