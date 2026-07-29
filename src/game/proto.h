@@ -147,6 +147,11 @@ int proto_undo_new_id(int type);
 int proto_max_id(int a1);
 int ResetPlayer();
 
+static bool exit_grid_pid(int pid)
+{
+    return pid >= FIRST_EXIT_GRID_PID && pid <= LAST_EXIT_GRID_PID;
+}
+
 } // namespace fallout
 
 #endif /* FALLOUT_GAME_PROTO_H_ */
