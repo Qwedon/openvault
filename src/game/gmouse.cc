@@ -2596,9 +2596,7 @@ static int gmouse_3d_determine_auto_mode(int mouseX, int mouseY, int elevation)
     Object* target = object_under_mouse(-1, true, elevation);
     if (target != nullptr) {
         const auto fidType = FID_TYPE(target->fid);
-        if (fidType != OBJ_TYPE_INTERFACE && fidType != OBJ_TYPE_WALL
-            // exit grids
-            && !(exit_grid_pid(target->pid)))
+        if (fidType != OBJ_TYPE_INTERFACE && fidType != OBJ_TYPE_WALL && !(exit_grid_pid(target->pid)))
             return GAME_MOUSE_MODE_ARROW;
     }
     return GAME_MOUSE_MODE_MOVE;
