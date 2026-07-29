@@ -65,7 +65,7 @@ typedef enum AnimationKind {
     ANIM_KIND_CHECK_FALLING = 23,
     ANIM_KIND_TOGGLE_OUTLINE = 24,
     ANIM_KIND_ANIMATE_FOREVER = 25,
-    ANIM_KIND_26 = 26,
+    ANIM_KIND_PING = 26,
     ANIM_KIND_27 = 27,
     ANIM_KIND_NOOP = 28,
 } AnimationKind;
@@ -196,7 +196,7 @@ typedef struct AnimationDescription {
         // - ANIM_KIND_MOVE_TO_OBJECT
         int actionPoints;
 
-        // ANIM_KIND_26
+        // ANIM_KIND_PING
         int animationSequenceIndex;
 
         // ANIM_KIND_CALLBACK3
@@ -385,7 +385,7 @@ static int anim_free_slot(int requestOptions)
             if (!(animationSequence->flags & ANIM_SEQ_RESERVED)) {
                 v2++;
             }
-        } else if (v1 == -1 && ((requestOptions & ANIMATION_REQUEST_0x100) == 0 || (animationSequence->flags & ANIM_SEQ_0x10) == 0)) {
+        } else if (v1 == -1 && ((requestOptions & ANIMATION_REQUEST_PING) == 0 || (animationSequence->flags & ANIM_SEQ_0x10) == 0)) {
             v1 = index;
         }
     }
@@ -1387,14 +1387,14 @@ int register_object_animate_forever(Object* owner, int anim, int delay)
 }
 
 // 0x41504C
-int register_ping(int a1, int delay)
+int register_ping(int flags, int delay)
 {
     if (check_registry(NULL) == -1) {
         anim_cleanup();
         return -1;
     }
 
-    int animationSequenceIndex = anim_free_slot(a1 | ANIMATION_REQUEST_0x100);
+    int animationSequenceIndex = anim_free_slot(flags | ANIMATION_REQUEST_PING);
     if (animationSequenceIndex == -1) {
         return -1;
     }
@@ -1404,7 +1404,7 @@ int register_ping(int a1, int delay)
     AnimationSequence* animationSequence = &(anim_set[curr_anim_set]);
     AnimationDescription* animationDescription = &(animationSequence->animations[curr_anim_counter]);
     animationDescription->owner = NULL;
-    animationDescription->kind = ANIM_KIND_26;
+    animationDescription->kind = ANIM_KIND_PING;
     animationDescription->artCacheKey = NULL;
     animationDescription->animationSequenceIndex = animationSequenceIndex;
     animationDescription->delay = delay;
@@ -1571,7 +1571,7 @@ static int anim_set_check(int animationSequenceIndex)
             }
             rc = anim_set_continue(animationSequenceIndex, 0);
             break;
-        case ANIM_KIND_26:
+        case ANIM_KIND_PING:
             anim_set[animationDescription->animationSequenceIndex].flags &= ~ANIM_SEQ_0x10;
             rc = anim_set_continue(animationDescription->animationSequenceIndex, 1);
             if (rc != -1) {
@@ -1661,7 +1661,7 @@ static int anim_set_end(int animationSequenceIndex)
 
         if (animationDescription->kind != 11 && animationDescription->kind != 12) {
             // TODO: Check.
-            if (animationDescription->kind != ANIM_KIND_26) {
+            if (animationDescription->kind != ANIM_KIND_PING) {
                 Object* owner = animationDescription->owner;
                 if (FID_TYPE(owner->fid) == OBJ_TYPE_CRITTER) {
                     int j = 0;
