@@ -221,8 +221,8 @@ typedef struct PathNode {
     int from;
     // actual type is likely char
     int rotation;
-    int field_C;
-    int field_10;
+    int estimate;
+    int cost;
 } PathNode;
 
 // TODO: I don't know what `sad` means, but it's definitely better than
@@ -1786,8 +1786,8 @@ int make_path_func(Object* object, int from, int to, unsigned char* rotations, i
     child[0].tile = from;
     child[0].from = -1;
     child[0].rotation = 0;
-    child[0].field_C = EST(from, to);
-    child[0].field_10 = 0;
+    child[0].estimate = EST(from, to);
+    child[0].cost = 0;
 
     for (int index = 1; index < 2000; index += 1) {
         child[index].tile = -1;
@@ -1810,7 +1810,7 @@ int make_path_func(Object* object, int from, int to, unsigned char* rotations, i
             PathNode* curr = &(child[index]);
             if (curr->tile != -1) {
                 v12++;
-                if (v63 == -1 || (curr->field_C + curr->field_10) < (prev->field_C + prev->field_10)) {
+                if (v63 == -1 || (curr->estimate + curr->cost) < (prev->estimate + prev->cost)) {
                     prev = curr;
                     v63 = index;
                 }
@@ -1881,11 +1881,11 @@ int make_path_func(Object* object, int from, int to, unsigned char* rotations, i
             int newY;
             tile_coord(tile, &newX, &newY, object->elevation);
 
-            v27->field_C = idist(newX, newY, toScreenX, toScreenY);
-            v27->field_10 = temp.field_10 + 50;
+            v27->estimate = idist(newX, newY, toScreenX, toScreenY);
+            v27->cost = temp.cost + 50;
 
             if (isNotInCombat && temp.rotation != rotation) {
-                v27->field_10 += 10;
+                v27->cost += 10;
             }
         }
 
