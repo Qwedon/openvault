@@ -511,7 +511,7 @@ int proto_read_protoUpdateData(Object* obj, DB_FILE* stream)
 
             break;
         case OBJ_TYPE_MISC:
-            if (obj->pid >= 0x5000010 && obj->pid <= 0x5000017) {
+            if (exit_grid_pid(obj->pid)) {
                 if (db_freadInt32(stream, &(obj->data.misc.map)) == -1) return -1;
                 if (db_freadInt32(stream, &(obj->data.misc.tile)) == -1) return -1;
                 if (db_freadInt32(stream, &(obj->data.misc.elevation)) == -1) return -1;
@@ -590,7 +590,7 @@ int proto_write_protoUpdateData(Object* obj, DB_FILE* stream)
             }
             break;
         case OBJ_TYPE_MISC:
-            if (obj->pid >= 0x5000010 && obj->pid <= 0x5000017) {
+            if (exit_grid_pid(obj->pid)) {
                 if (db_fwriteInt32(stream, data->misc.map) == -1) return -1;
                 if (db_fwriteInt32(stream, data->misc.tile) == -1) return -1;
                 if (db_fwriteInt32(stream, data->misc.elevation) == -1) return -1;
@@ -664,7 +664,7 @@ int proto_update_gen(Object* obj)
         }
         break;
     case OBJ_TYPE_MISC:
-        if (obj->pid >= 0x5000010 && obj->pid <= 0x5000017) {
+        if (exit_grid_pid(obj->pid)) {
             data->misc.tile = -1;
             data->misc.elevation = 0;
             data->misc.rotation = 0;
