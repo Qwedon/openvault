@@ -241,12 +241,12 @@ typedef struct AnimationSad {
     unsigned int ticksPerFrame;
 
     int animationSequenceIndex;
-    int field_1C; // length of field_28
-    int field_20; // current index in field_28
+    int field_1C; // length of spn_list
+    int field_20; // current index in spn_list
     int field_24;
     union {
         unsigned char rotations[3200];
-        StraightPathNode field_28[200];
+        StraightPathNode spn_list[200];
     };
 } AnimationSad;
 
@@ -2479,7 +2479,7 @@ static int anim_move_straight_to_tile(Object* obj, int tile, int elevation, int 
         v15 = 32;
     }
 
-    sad_entry->field_1C = make_straight_path(obj, obj->tile, tile, sad_entry->field_28, NULL, v15);
+    sad_entry->field_1C = make_straight_path(obj, obj->tile, tile, sad_entry->spn_list, NULL, v15);
     if (sad_entry->field_1C == 0) {
         sad_entry->field_20 = -1000;
         return -1;
@@ -2510,7 +2510,7 @@ int anim_move_on_stairs(Object* obj, int tile, int elevation, int anim, int anim
     sad_entry->animationTimestamp = 0;
     sad_entry->ticksPerFrame = compute_tpf(obj, sad_entry->fid);
     sad_entry->animationSequenceIndex = animationSequenceIndex;
-    sad_entry->field_1C = make_stair_path(obj, obj->tile, obj->elevation, tile, elevation, sad_entry->field_28, NULL);
+    sad_entry->field_1C = make_stair_path(obj, obj->tile, obj->elevation, tile, elevation, sad_entry->spn_list, NULL);
     if (sad_entry->field_1C == 0) {
         sad_entry->field_20 = -1000;
         return -1;
@@ -2545,7 +2545,7 @@ int check_for_falling(Object* obj, int anim, int a3)
     sad_entry->animationTimestamp = 0;
     sad_entry->ticksPerFrame = compute_tpf(obj, sad_entry->fid);
     sad_entry->animationSequenceIndex = a3;
-    sad_entry->field_1C = make_straight_path_func(obj, obj->tile, obj->tile, sad_entry->field_28, 0, 16, obj_blocking_at);
+    sad_entry->field_1C = make_straight_path_func(obj, obj->tile, obj->tile, sad_entry->spn_list, 0, 16, obj_blocking_at);
     if (sad_entry->field_1C == 0) {
         sad_entry->field_20 = -1000;
         return -1;
@@ -2707,7 +2707,7 @@ static void object_straight_move(int index)
         }
 
         if (sad_entry->field_20 < sad_entry->field_1C) {
-            StraightPathNode* v12 = &(sad_entry->field_28[sad_entry->field_20]);
+            StraightPathNode* v12 = &(sad_entry->spn_list[sad_entry->field_20]);
 
             obj_move_to_tile(object, v12->tile, v12->elevation, &temp);
             rect_min_bound(&dirtyRect, &temp, &dirtyRect);
