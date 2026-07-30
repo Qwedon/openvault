@@ -2635,32 +2635,31 @@ static void object_move(int index)
             obj_move_to_tile(object, v10, object->elevation, &temp);
             rect_min_bound(&dirty, &temp, &dirty);
 
-            int v17 = 0;
+            bool cant_move = false;
             if (isInCombat() && FID_TYPE(object->fid) == OBJ_TYPE_CRITTER) {
-                int v18 = critter_compute_ap_from_distance(object, 1);
-                if (combat_free_move < v18) {
-                    int ap = object->data.critter.combat.ap;
-                    int v20 = v18 - combat_free_move;
+                int action_points_required = critter_compute_ap_from_distance(object, 1);
+                if (action_points_required > combat_free_move) {
+                    action_points_required -= combat_free_move;
                     combat_free_move = 0;
-                    if (v20 > ap) {
+                    if (action_points_required > object->data.critter.combat.ap) {
                         object->data.critter.combat.ap = 0;
                     } else {
-                        object->data.critter.combat.ap = ap - v20;
+                        object->data.critter.combat.ap -= action_points_required;
                     }
                 } else {
-                    combat_free_move -= v18;
+                    combat_free_move -= action_points_required;
                 }
 
                 if (object == obj_dude) {
                     intface_update_move_points(obj_dude->data.critter.combat.ap, combat_free_move);
                 }
 
-                v17 = (object->data.critter.combat.ap + combat_free_move) <= 0;
+                cant_move = (object->data.critter.combat.ap + combat_free_move) <= 0;
             }
 
             sad_entry->field_20 += 1;
 
-            if (sad_entry->field_20 == sad_entry->field_1C || v17) {
+            if (sad_entry->field_20 == sad_entry->field_1C || cant_move) {
                 sad_entry->field_20 = -1000;
             } else {
                 obj_set_rotation(object, sad_entry->rotations[sad_entry->field_20], &temp);
