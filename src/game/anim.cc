@@ -2637,17 +2637,17 @@ static void object_move(int index)
 
             bool cant_move = false;
             if (isInCombat() && FID_TYPE(object->fid) == OBJ_TYPE_CRITTER) {
-                int action_points_required = critter_compute_ap_from_distance(object, 1);
-                if (action_points_required > combat_free_move) {
-                    action_points_required -= combat_free_move;
+                int ap_required = critter_compute_ap_from_distance(object, 1);
+                if (ap_required > combat_free_move) {
+                    ap_required -= combat_free_move;
                     combat_free_move = 0;
-                    if (action_points_required > object->data.critter.combat.ap) {
+                    if (ap_required > object->data.critter.combat.ap) {
                         object->data.critter.combat.ap = 0;
                     } else {
-                        object->data.critter.combat.ap -= action_points_required;
+                        object->data.critter.combat.ap -= ap_required;
                     }
                 } else {
-                    combat_free_move -= action_points_required;
+                    combat_free_move -= ap_required;
                 }
 
                 if (object == obj_dude) {
