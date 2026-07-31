@@ -19,7 +19,7 @@ extern SDL_Texture* gSdlTexture;
 extern SDL_Surface* gSdlTextureSurface;
 extern FpsLimiter sharedFpsLimiter;
 
-void GNW95_SetPaletteEntries(unsigned char* a1, int a2, int a3);
+void GNW95_SetPaletteEntries(unsigned char* palette, int start, int count);
 void GNW95_SetPalette(unsigned char* palette);
 void GNW95_ShowRect(unsigned char* src, unsigned int src_pitch, unsigned int a3, unsigned int src_x, unsigned int src_y, unsigned int src_width, unsigned int src_height, unsigned int dest_x, unsigned int dest_y);
 
