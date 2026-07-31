@@ -61,7 +61,7 @@ $ sudo dnf install SDL2
 
 ### macOS
 
-> **NOTE**: macOS 10.12 (Sierra) or higher is required. Runs natively on Intel-based Macs and Apple Silicon.
+> **NOTE**: macOS 10.15 (Catalina) or higher is required. Runs natively on Intel-based Macs and Apple Silicon.
 
 - Use Windows installation as a base - it contains data assets needed to play. Copy `Fallout` folder somewhere, for example `/Applications/Fallout`.
 
