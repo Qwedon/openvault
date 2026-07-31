@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #else
 #include <dirent.h>
-#include <unistd.h>
 #endif
 
 #include <SDL.h>
