@@ -1,7 +1,6 @@
 #include "platform_compat.h"
 
 #include <filesystem>
-#include <sys/stat.h>
 
 #ifdef _WIN32
 #include <io.h>
