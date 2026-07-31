@@ -1,10 +1,7 @@
 #ifndef FALLOUT_PLATFORM_COMPAT_H_
 #define FALLOUT_PLATFORM_COMPAT_H_
 
-#include <errno.h>
-#include <stddef.h>
 #include <stdio.h>
-#include <string>
 
 namespace fallout {
 
