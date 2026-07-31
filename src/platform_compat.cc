@@ -1,16 +1,12 @@
 #include "platform_compat.h"
 
 #include <filesystem>
-#include <sys/stat.h>
 
 #ifdef _WIN32
-#include <direct.h>
 #include <io.h>
-#include <stdio.h>
 #include <stdlib.h>
 #else
 #include <dirent.h>
-#include <unistd.h>
 #endif
 
 #include <SDL.h>
