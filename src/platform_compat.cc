@@ -1,22 +1,12 @@
 #include "platform_compat.h"
 
-#include <string.h>
+#include <filesystem>
 
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
 #include <sys/stat.h>
-
-#ifdef _WIN32
-#include <direct.h>
-#include <io.h>
-#include <stdio.h>
-#include <stdlib.h>
-#else
-#include <dirent.h>
-#include <unistd.h>
-#endif
 
 #include <SDL.h>
 
@@ -57,130 +47,46 @@ char* compat_itoa(int value, char* buffer, int radix)
 
 void compat_splitpath(const char* path, char* drive, char* dir, char* fname, char* ext)
 {
-#ifdef _WIN32
-    _splitpath(path, drive, dir, fname, ext);
-#else
-    const char* driveStart = path;
-    if (path[0] == '/' && path[1] == '/') {
-        path += 2;
-        while (*path != '\0' && *path != '/' && *path != '.') {
-            path++;
-        }
-    }
+    std::filesystem::path fsPath(path);
 
     if (drive != NULL) {
-        size_t driveSize = path - driveStart;
-        if (driveSize > COMPAT_MAX_DRIVE - 1) {
-            driveSize = COMPAT_MAX_DRIVE - 1;
-        }
-        strncpy(drive, path, driveSize);
-        drive[driveSize] = '\0';
-    }
-
-    const char* dirStart = path;
-    const char* fnameStart = path;
-    const char* extStart = NULL;
-
-    const char* end = path;
-    while (*end != '\0') {
-        if (*end == '/') {
-            fnameStart = end + 1;
-        } else if (*end == '.') {
-            extStart = end;
-        }
-        end++;
-    }
-
-    if (extStart == NULL) {
-        extStart = end;
+        strncpy(drive, fsPath.root_name().string().c_str(), COMPAT_MAX_DRIVE - 1);
     }
 
     if (dir != NULL) {
-        size_t dirSize = fnameStart - dirStart;
-        if (dirSize > COMPAT_MAX_DIR - 1) {
-            dirSize = COMPAT_MAX_DIR - 1;
-        }
-        strncpy(dir, path, dirSize);
-        dir[dirSize] = '\0';
+        strncpy(dir, fsPath.parent_path().string().c_str(), COMPAT_MAX_DIR - 1);
     }
 
     if (fname != NULL) {
-        size_t fileNameSize = extStart - fnameStart;
-        if (fileNameSize > COMPAT_MAX_FNAME - 1) {
-            fileNameSize = COMPAT_MAX_FNAME - 1;
-        }
-        strncpy(fname, fnameStart, fileNameSize);
-        fname[fileNameSize] = '\0';
+        strncpy(fname, fsPath.stem().string().c_str(), COMPAT_MAX_FNAME - 1);
     }
 
     if (ext != NULL) {
-        size_t extSize = end - extStart;
-        if (extSize > COMPAT_MAX_EXT - 1) {
-            extSize = COMPAT_MAX_EXT - 1;
-        }
-        strncpy(ext, extStart, extSize);
-        ext[extSize] = '\0';
+        strncpy(ext, fsPath.extension().string().c_str(), COMPAT_MAX_EXT - 1);
     }
-#endif
 }
 
 void compat_makepath(char* path, const char* drive, const char* dir, const char* fname, const char* ext)
 {
-#ifdef _WIN32
-    _makepath(path, drive, dir, fname, ext);
-#else
-    path[0] = '\0';
+    std::filesystem::path fsPath;
 
     if (drive != NULL && *drive != '\0') {
-        strcpy(path, drive);
-        path = strchr(path, '\0');
-
-        if (path[-1] == '/') {
-            path--;
-        } else {
-            *path = '/';
-        }
+        fsPath /= drive;
     }
 
     if (dir != NULL && *dir != '\0') {
-        if (*dir != '/' && *path == '/') {
-            path++;
-        }
-
-        strcpy(path, dir);
-        path = strchr(path, '\0');
-
-        if (path[-1] == '/') {
-            path--;
-        } else {
-            *path = '/';
-        }
+        fsPath /= dir;
     }
 
     if (fname != NULL && *fname != '\0') {
-        if (*fname != '/' && *path == '/') {
-            path++;
-        }
-
-        strcpy(path, fname);
-        path = strchr(path, '\0');
-    } else {
-        if (*path == '/') {
-            path++;
-        }
+        fsPath /= fname;
     }
 
     if (ext != NULL && *ext != '\0') {
-        if (*ext != '.') {
-            *path++ = '.';
-        }
-
-        strcpy(path, ext);
-        path = strchr(path, '\0');
+        fsPath += ext;
     }
 
-    *path = '\0';
-#endif
+    strncpy(path, fsPath.string().c_str(), COMPAT_MAX_PATH - 1);
 }
 
 int compat_read(int fileHandle, void* buf, unsigned int size)
@@ -203,25 +109,20 @@ long compat_tell(int fd)
     return lseek(fd, 0, SEEK_CUR);
 }
 
-long compat_filelength(int fd)
+long compat_filelength(const char* path)
 {
-    long originalOffset = lseek(fd, 0, SEEK_CUR);
-    lseek(fd, 0, SEEK_SET);
-    long filesize = lseek(fd, 0, SEEK_END);
-    lseek(fd, originalOffset, SEEK_SET);
-    return filesize;
+    char nativePath[COMPAT_MAX_PATH];
+    compat_prepare_native_path(nativePath, path);
+    return std::filesystem::file_size(nativePath);
 }
 
 int compat_mkdir(const char* path)
 {
+    std::error_code ec;
     char nativePath[COMPAT_MAX_PATH];
     compat_prepare_native_path(nativePath, path);
-
-#ifdef _WIN32
-    return mkdir(nativePath);
-#else
-    return mkdir(nativePath, 0755);
-#endif
+    std::filesystem::create_directory(nativePath, ec);
+    return ec.value();
 }
 
 unsigned int compat_timeGetTime()
@@ -238,20 +139,25 @@ FILE* compat_fopen(const char* path, const char* mode)
 
 int compat_remove(const char* path)
 {
+    std::error_code err;
     char nativePath[COMPAT_MAX_PATH];
     compat_prepare_native_path(nativePath, path);
-    return remove(nativePath);
+    std::filesystem::remove(nativePath, err);
+    return err.value();
 }
 
 int compat_rename(const char* oldFileName, const char* newFileName)
 {
+    std::error_code err;
+
     char nativeOldFileName[COMPAT_MAX_PATH];
     compat_prepare_native_path(nativeOldFileName, oldFileName);
 
     char nativeNewFileName[COMPAT_MAX_PATH];
     compat_prepare_native_path(nativeNewFileName, newFileName);
 
-    return rename(nativeOldFileName, nativeNewFileName);
+    std::filesystem::rename(nativeOldFileName, nativeNewFileName, err);
+    return err.value();
 }
 
 void compat_windows_path_to_native(char* path)
