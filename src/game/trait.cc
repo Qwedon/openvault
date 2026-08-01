@@ -204,7 +204,7 @@ int trait_adjust_stat(int stat)
             modifier += 1;
         }
         if (trait_level(TRAIT_NIGHT_PERSON)) {
-            if (game_time_hour() - 600 < 1200) {
+            if (game_time_hour() >= 1800 || game_time_hour() <= 600) {
                 modifier -= 1;
             } else {
                 modifier += 1;
@@ -226,7 +226,7 @@ int trait_adjust_stat(int stat)
             modifier += 1;
         }
         if (trait_level(TRAIT_NIGHT_PERSON)) {
-            if (game_time_hour() - 600 < 1200) {
+            if (game_time_hour() >= 1800 || game_time_hour() <= 600) {
                 modifier -= 1;
             } else {
                 modifier += 1;
