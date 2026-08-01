@@ -125,7 +125,7 @@ bool proto_action_can_talk_to(int pid);
 int proto_action_can_pickup(int pid);
 char* proto_name(int pid);
 char* proto_description(int pid);
-int proto_critter_init(Proto* a1, int a2);
+int proto_critter_init(Proto* proto, int pid);
 void clear_pupdate_data(Object* obj);
 int proto_read_protoUpdateData(Object* obj, DB_FILE* stream);
 int proto_write_protoUpdateData(Object* obj, DB_FILE* stream);
