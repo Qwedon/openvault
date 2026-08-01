@@ -35,7 +35,7 @@ typedef struct FadeSound {
     int targetVolume;
     int initialVolume;
     int currentVolume;
-    int field_14;
+    int pause;
     struct FadeSound* prev;
     struct FadeSound* next;
 } FadeSound;
@@ -58,7 +58,7 @@ static Uint32 doTimerEvent(Uint32 interval, void* param);
 static void removeTimedEvent(SDL_TimerID* timerId);
 static void removeFadeSound(FadeSound* fadeSound);
 static void fadeSounds();
-static int internalSoundFade(Sound* sound, int duration, int targetVolume, int a4);
+static int internalSoundFade(Sound* sound, int duration, int targetVolume, bool pause);
 
 // 0x507E04
 static FadeSound* fadeHead = NULL;
@@ -1515,7 +1515,7 @@ static void fadeSounds()
             soundVolume(ptr->sound, ptr->currentVolume);
         } else {
             if (ptr->targetVolume == 0) {
-                if (ptr->field_14) {
+                if (ptr->pause) {
                     soundPause(ptr->sound);
                     soundVolume(ptr->sound, ptr->initialVolume);
                 } else {
@@ -1544,7 +1544,7 @@ static void fadeSounds()
 }
 
 // 0x49BF04
-static int internalSoundFade(Sound* sound, int duration, int targetVolume, int a4)
+static int internalSoundFade(Sound* sound, int duration, int targetVolume, bool pause)
 {
     FadeSound* ptr;
 
@@ -1598,7 +1598,7 @@ static int internalSoundFade(Sound* sound, int duration, int targetVolume, int a
     ptr->targetVolume = targetVolume;
     ptr->initialVolume = soundGetVolume(sound);
     ptr->currentVolume = ptr->initialVolume;
-    ptr->field_14 = a4;
+    ptr->pause = pause;
     // TODO: Check.
     ptr->deltaVolume = 8 * (125 * (targetVolume - ptr->initialVolume)) / (40 * duration);
 
@@ -1639,7 +1639,7 @@ static int internalSoundFade(Sound* sound, int duration, int targetVolume, int a
 // 0x49C088
 int soundFade(Sound* sound, int duration, int targetVolume)
 {
-    return internalSoundFade(sound, duration, targetVolume, 0);
+    return internalSoundFade(sound, duration, targetVolume, false);
 }
 
 // 0x49C0D0
