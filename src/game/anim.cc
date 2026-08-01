@@ -66,8 +66,7 @@ typedef enum AnimationKind {
     ANIM_KIND_TOGGLE_OUTLINE = 24,
     ANIM_KIND_ANIMATE_FOREVER = 25,
     ANIM_KIND_PING = 26,
-    ANIM_KIND_27 = 27,
-    ANIM_KIND_NOOP = 28,
+    ANIM_KIND_CONTINUE = 28,
 } AnimationKind;
 
 typedef enum AnimationSequenceFlags {
@@ -472,11 +471,11 @@ int register_end()
         animationSequence->flags |= ANIM_SEQ_COMBAT_ANIM_STARTED;
     }
 
-    int v1 = curr_anim_set;
+    int index = curr_anim_set;
     curr_anim_set = -1;
 
     if (!(animationSequence->flags & ANIM_SEQ_0x10)) {
-        anim_set_continue(v1, 1);
+        anim_set_continue(index, 1);
     }
 
     return 0;
@@ -1344,10 +1343,10 @@ int register_object_play_sfx(Object* owner, const char* soundEffectName, int del
         if (animationDescription->param1 != NULL) {
             animationDescription->callback = (AnimationCallback*)gsnd_anim_sound;
         } else {
-            animationDescription->kind = ANIM_KIND_NOOP;
+            animationDescription->kind = ANIM_KIND_CONTINUE;
         }
     } else {
-        animationDescription->kind = ANIM_KIND_NOOP;
+        animationDescription->kind = ANIM_KIND_CONTINUE;
     }
 
     animationDescription->artCacheKey = NULL;
@@ -1578,7 +1577,7 @@ static int anim_set_check(int animationSequenceIndex)
                 rc = anim_set_continue(animationSequenceIndex, 0);
             }
             break;
-        case ANIM_KIND_NOOP:
+        case ANIM_KIND_CONTINUE:
             rc = anim_set_continue(animationSequenceIndex, 0);
             break;
         default:
