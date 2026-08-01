@@ -368,31 +368,31 @@ char* proto_description(int pid)
 }
 
 // 0x48D3C0
-int proto_critter_init(Proto* a1, int a2)
+int proto_critter_init(Proto* proto, int pid)
 {
     if (!protos_been_initialized) {
         return -1;
     }
 
-    int v1 = a2 & 0xFFFFFF;
+    int num = pid & 0xFFFFFF;
 
-    a1->pid = -1;
-    a1->messageId = 100 * v1;
-    a1->fid = art_id(OBJ_TYPE_CRITTER, v1 - 1, 0, 0, 0);
-    a1->critter.lightDistance = 0;
-    a1->critter.lightIntensity = 0;
-    a1->critter.flags = 0x20000000;
-    a1->critter.extendedFlags = 0x6000;
-    a1->critter.sid = -1;
-    a1->critter.data.flags = 0;
-    a1->critter.data.bodyType = 0;
-    a1->critter.headFid = -1;
-    a1->critter.aiPacket = 1;
-    if (!art_exists(a1->fid)) {
-        a1->fid = art_id(OBJ_TYPE_CRITTER, 0, 0, 0, 0);
+    proto->pid = -1;
+    proto->messageId = 100 * num;
+    proto->fid = art_id(OBJ_TYPE_CRITTER, num - 1, 0, 0, 0);
+    proto->critter.lightDistance = 0;
+    proto->critter.lightIntensity = 0;
+    proto->critter.flags = 0x20000000;
+    proto->critter.extendedFlags = 0x6000;
+    proto->critter.sid = -1;
+    proto->critter.data.flags = 0;
+    proto->critter.data.bodyType = 0;
+    proto->critter.headFid = -1;
+    proto->critter.aiPacket = 1;
+    if (!art_exists(proto->fid)) {
+        proto->fid = art_id(OBJ_TYPE_CRITTER, 0, 0, 0, 0);
     }
 
-    CritterProtoData* data = &(a1->critter.data);
+    CritterProtoData* data = &(proto->critter.data);
     data->experience = 60;
     data->killType = 0;
     stat_set_defaults(data);
