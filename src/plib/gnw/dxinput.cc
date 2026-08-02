@@ -19,13 +19,6 @@ static int gMousePrevX = 0;
 static int gMousePrevY = 0;
 static bool gMousePrevInitialized = false;
 
-#if defined(__APPLE__) && TARGET_OS_IOS
-static bool last_input_was_mouse = false;
-static int last_system_x = -1;
-static int last_system_y = -1;
-static Uint32 last_mouse_buttons = 0;
-#endif
-
 // 0x4E0400
 bool dxinput_init()
 {
