@@ -159,7 +159,7 @@ int scripts_clear_state();
 int scripts_clear_combat_requests(Script* script);
 int scripts_check_state();
 int scripts_check_state_in_combat();
-int scripts_request_combat(STRUCT_664980* a1);
+int scripts_request_combat(CombatStartData* combat);
 void scripts_request_townmap();
 void scripts_request_worldmap();
 int scripts_request_elevator(int elevator);
