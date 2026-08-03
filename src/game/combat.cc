@@ -2426,7 +2426,7 @@ void combat(CombatStartData* csd)
             gcsd = NULL;
         } else {
             if (csd != NULL) {
-                combat_sequence_init(attack->attacker, attack->defender);
+                combat_sequence_init(csd->attacker, csd->defender);
             } else {
                 combat_sequence_init(NULL, NULL);
             }
