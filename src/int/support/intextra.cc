@@ -1518,28 +1518,28 @@ static void op_attack(Program* program)
             combatData->whoHitMe = target;
         }
     } else {
-        STRUCT_664980 attack;
-        attack.attacker = self;
-        attack.defender = target;
-        attack.actionPointsBonus = 0;
-        attack.accuracyBonus = data[4];
-        attack.damageBonus = 0;
-        attack.minDamage = data[3];
-        attack.maxDamage = data[2];
+        CombatStartData combat;
+        combat.attacker = self;
+        combat.defender = target;
+        combat.actionPointsBonus = 0;
+        combat.accuracyBonus = data[4];
+        combat.damageBonus = 0;
+        combat.minDamage = data[3];
+        combat.maxDamage = data[2];
 
         // TODO: Something is probably broken here, why it wants
         // flags to be the same? Maybe because both of them
         // are applied to defender because of the bug in 0x422F3C?
         if (data[1] == data[0]) {
-            attack.overrideAttackResults = 1;
-            attack.targetResults = data[0];
-            attack.attackerResults = data[1];
+            combat.overrideAttackResults = 1;
+            combat.targetResults = data[0];
+            combat.attackerResults = data[1];
         } else {
-            attack.overrideAttackResults = 0;
+            combat.overrideAttackResults = 0;
         }
 
         dbg_print_com_data(self, target);
-        scripts_request_combat(&attack);
+        scripts_request_combat(&combat);
     }
 
     program->flags &= ~PROGRAM_FLAG_0x20;
@@ -3730,18 +3730,18 @@ static void op_attack_setup(Program* program)
                 critter_set_who_hit_me(attacker, defender);
             }
         } else {
-            STRUCT_664980 attack;
-            attack.attacker = attacker;
-            attack.defender = defender;
-            attack.actionPointsBonus = 0;
-            attack.accuracyBonus = 0;
-            attack.damageBonus = 0;
-            attack.minDamage = 0;
-            attack.maxDamage = INT_MAX;
-            attack.overrideAttackResults = 0;
+            CombatStartData combat;
+            combat.attacker = attacker;
+            combat.defender = defender;
+            combat.actionPointsBonus = 0;
+            combat.accuracyBonus = 0;
+            combat.damageBonus = 0;
+            combat.minDamage = 0;
+            combat.maxDamage = INT_MAX;
+            combat.overrideAttackResults = 0;
 
             dbg_print_com_data(attacker, defender);
-            scripts_request_combat(&attack);
+            scripts_request_combat(&combat);
         }
     }
 
