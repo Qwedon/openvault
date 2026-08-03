@@ -2970,26 +2970,26 @@ static int compute_attack(Attack* attack)
 }
 
 // 0x421800
-void compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4)
+void compute_explosion_on_extras(Attack* attack, bool isFromAttacker, bool isGrenade, bool noDamage)
 {
     // 0x56BD58
     static Attack temp_ctd;
 
-    Object* attacker;
+    Object* target_obj;
 
-    if (a2) {
-        attacker = attack->attacker;
+    if (isFromAttacker) {
+        target_obj = attack->attacker;
     } else {
         if ((attack->attackerFlags & DAM_HIT) != 0) {
-            attacker = attack->defender;
+            target_obj = attack->defender;
         } else {
-            attacker = NULL;
+            target_obj = NULL;
         }
     }
 
     int origin_tile;
-    if (attacker != NULL) {
-        origin_tile = attacker->tile;
+    if (target_obj != NULL) {
+        origin_tile = target_obj->tile;
     } else {
         origin_tile = attack->tile;
     }
@@ -2999,9 +2999,11 @@ void compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4)
     int rotation = 0;
     int current_tile = -1;
     int current_center_tile = origin_tile;
+    // Check adjacent tiles for possible targets, going ring-by-ring.
     while (attack->extrasLength < 6) {
         if (radius != 0 && (current_tile = tile_num_in_direction(current_tile, rotation, 1)) != current_center_tile) {
             step++;
+            // The larger the radius, the slower we rotate.
             if (step % radius == 0) {
                 rotation += 1;
                 if (rotation == ROTATION_COUNT) {
@@ -3009,6 +3011,7 @@ void compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4)
                 }
             }
         } else {
+            // Go to the next ring.
             radius++;
 
             if (isGrenade && radius > 2) {
@@ -3028,7 +3031,7 @@ void compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4)
             break;
         }
 
-        Object* obstacle = obj_blocking_at(attacker, current_tile, attack->attacker->elevation);
+        Object* obstacle = obj_blocking_at(target_obj, current_tile, attack->attacker->elevation);
         if (obstacle != NULL
             && FID_TYPE(obstacle->fid) == OBJ_TYPE_CRITTER
             && (obstacle->data.critter.combat.results & DAM_DEAD) == 0
@@ -3051,7 +3054,7 @@ void compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4)
                     attack->extrasHitLocation[index] = HIT_LOCATION_TORSO;
                     attack->extras[index] = obstacle;
                     combat_ctd_init(&temp_ctd, attack->attacker, obstacle, attack->hitMode, HIT_LOCATION_TORSO);
-                    if (!a4) {
+                    if (!noDamage) {
                         temp_ctd.attackerFlags |= DAM_HIT;
                         compute_damage(&temp_ctd, 1, 2);
                     }
