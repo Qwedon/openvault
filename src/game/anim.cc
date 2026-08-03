@@ -2020,8 +2020,8 @@ int make_straight_path_func(Object* a1, int from, int to, StraightPathNode* path
     else
         stepY = 0;
 
-    int v48 = 2 * abs(toX - fromX);
-    int v47 = 2 * abs(toY - fromY);
+    int ddx = 2 * abs(toX - fromX);
+    int ddy = 2 * abs(toY - fromY);
 
     int tileX = fromX;
     int tileY = fromY;
@@ -2031,8 +2031,8 @@ int make_straight_path_func(Object* a1, int from, int to, StraightPathNode* path
     int v22 = 0;
     int tile;
 
-    if (v48 <= v47) {
-        int middle = v48 - v47 / 2;
+    if (ddx <= ddy) {
+        int middle = ddx - ddy / 2;
         while (true) {
             tile = tile_num(tileX, tileY, a1->elevation);
 
@@ -2065,11 +2065,11 @@ int make_straight_path_func(Object* a1, int from, int to, StraightPathNode* path
 
             if (middle >= 0) {
                 tileX += stepX;
-                middle -= v47;
+                middle -= ddy;
             }
 
             tileY += stepY;
-            middle += v48;
+            middle += ddx;
 
             if (tile != prevTile) {
                 if (a5 != NULL) {
@@ -2085,7 +2085,7 @@ int make_straight_path_func(Object* a1, int from, int to, StraightPathNode* path
             }
         }
     } else {
-        int middle = v47 - v48 / 2;
+        int middle = ddy - ddx / 2;
         while (true) {
             tile = tile_num(tileX, tileY, a1->elevation);
 
@@ -2118,11 +2118,11 @@ int make_straight_path_func(Object* a1, int from, int to, StraightPathNode* path
 
             if (middle >= 0) {
                 tileY += stepY;
-                middle -= v48;
+                middle -= ddx;
             }
 
             tileX += stepX;
-            middle += v47;
+            middle += ddy;
 
             if (tile != prevTile) {
                 if (a5 != NULL) {
