@@ -60,8 +60,8 @@ typedef struct ScriptList {
 
 typedef struct ScriptState {
     unsigned int requests;
-    STRUCT_664980 combatState1;
-    STRUCT_664980 combatState2;
+    CombatStartData combatState1;
+    CombatStartData combatState2;
     int elevatorType;
     int explosionTile;
     int explosionElevation;
@@ -968,10 +968,10 @@ int scripts_check_state_in_combat()
 }
 
 // 0x492794
-int scripts_request_combat(STRUCT_664980* a1)
+int scripts_request_combat(CombatStartData* combat)
 {
-    if (a1) {
-        memcpy(&scriptState.combatState1, a1, sizeof(scriptState.combatState1));
+    if (combat) {
+        memcpy(&scriptState.combatState1, combat, sizeof(scriptState.combatState1));
     } else {
         scriptState.requests |= SCRIPT_REQUEST_NO_INITIAL_COMBAT_STATE;
     }
