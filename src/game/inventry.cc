@@ -1362,38 +1362,38 @@ void exit_inventory(bool shouldEnableIso)
     gmouse_enable();
 
     if (dropped_explosive) {
-        Attack v1;
-        combat_ctd_init(&v1, obj_dude, NULL, HIT_MODE_PUNCH, HIT_LOCATION_TORSO);
-        v1.attackerFlags = DAM_HIT;
-        v1.tile = obj_dude->tile;
-        compute_explosion_on_extras(&v1, 0, 0, 1);
+        Attack attack;
+        combat_ctd_init(&attack, obj_dude, NULL, HIT_MODE_PUNCH, HIT_LOCATION_TORSO);
+        attack.attackerFlags = DAM_HIT;
+        attack.tile = obj_dude->tile;
+        compute_explosion_on_extras(&attack, 0, 0, 1);
 
-        Object* v2 = NULL;
-        for (int index = 0; index < v1.extrasLength; index++) {
-            Object* critter = v1.extras[index];
+        Object* watcher = NULL;
+        for (int index = 0; index < attack.extrasLength; index++) {
+            Object* critter = attack.extras[index];
             if (critter != obj_dude
                 && critter->data.critter.combat.team != obj_dude->data.critter.combat.team
                 && stat_result(critter, STAT_PERCEPTION, 0, NULL) >= ROLL_SUCCESS) {
                 critter_set_who_hit_me(critter, obj_dude);
 
-                if (v2 == NULL) {
-                    v2 = critter;
+                if (watcher == NULL) {
+                    watcher = critter;
                 }
             }
         }
 
-        if (v2 != NULL) {
+        if (watcher != NULL) {
             if (!isInCombat()) {
-                STRUCT_664980 v3;
-                v3.attacker = v2;
-                v3.defender = obj_dude;
-                v3.actionPointsBonus = 0;
-                v3.accuracyBonus = 0;
-                v3.damageBonus = 0;
-                v3.minDamage = 0;
-                v3.maxDamage = INT_MAX;
-                v3.overrideAttackResults = 0;
-                scripts_request_combat(&v3);
+                CombatStartData combat;
+                combat.attacker = watcher;
+                combat.defender = obj_dude;
+                combat.actionPointsBonus = 0;
+                combat.accuracyBonus = 0;
+                combat.damageBonus = 0;
+                combat.minDamage = 0;
+                combat.maxDamage = INT_MAX;
+                combat.overrideAttackResults = 0;
+                scripts_request_combat(&combat);
             }
         }
 
