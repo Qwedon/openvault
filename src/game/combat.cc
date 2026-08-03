@@ -93,7 +93,7 @@ static int combat_turn_running = 0;
 unsigned int combat_state = COMBAT_STATE_0x02;
 
 // 0x4FEC88
-STRUCT_664980* gcsd = NULL;
+CombatStartData* gcsd = NULL;
 
 // 0x4FEC8C
 bool combat_call_display = false;
@@ -2399,20 +2399,21 @@ static bool combat_should_end()
 }
 
 // 0x420B20
-void combat(STRUCT_664980* attack)
+void combat(CombatStartData* csd)
 {
-    if (attack == NULL
-        || (attack->attacker == NULL || attack->attacker->elevation == map_elevation)
-        || (attack->defender == NULL || attack->defender->elevation == map_elevation)) {
-        int v3 = combat_state & 0x01;
+    if (csd == NULL
+        || (csd->attacker == NULL || csd->attacker->elevation == map_elevation)
+        || (csd->defender == NULL || csd->defender->elevation == map_elevation)) {
+        bool wasInCombat = (combat_state & 0x01) != 0;
 
         combat_begin(NULL);
 
-        int v6;
+        int curIndex;
 
-        if (v3 != 0) {
+        // If we loaded a save in combat, we need to force dude turn and then continue with the next combatant.
+        if (wasInCombat) {
             if (combat_turn(obj_dude, true) == -1) {
-                v6 = -1;
+                curIndex = -1;
             } else {
                 int index;
                 for (index = 0; index < list_com; index++) {
@@ -2420,27 +2421,27 @@ void combat(STRUCT_664980* attack)
                         break;
                     }
                 }
-                v6 = index + 1;
+                curIndex = index + 1;
             }
             gcsd = NULL;
         } else {
-            if (attack != NULL) {
+            if (csd != NULL) {
                 combat_sequence_init(attack->attacker, attack->defender);
             } else {
                 combat_sequence_init(NULL, NULL);
             }
 
-            gcsd = attack;
-            v6 = 0;
+            gcsd = csd;
+            curIndex = 0;
         }
 
         do {
-            if (v6 == -1) {
+            if (curIndex == -1) {
                 break;
             }
 
-            for (; v6 < list_com; v6++) {
-                if (combat_turn(combat_list[v6], false) == -1) {
+            for (; curIndex < list_com; curIndex++) {
+                if (combat_turn(combat_list[curIndex], false) == -1) {
                     break;
                 }
 
@@ -2451,12 +2452,12 @@ void combat(STRUCT_664980* attack)
                 gcsd = NULL;
             }
 
-            if (v6 < list_com) {
+            if (curIndex < list_com) {
                 break;
             }
 
             combat_sequence();
-            v6 = 0;
+            curIndex = 0;
         } while (!combat_should_end());
 
         if (combat_end_due_to_load) {
@@ -4580,7 +4581,7 @@ void combat_attack_this(Object* target)
     }
 
     if (!isInCombat()) {
-        STRUCT_664980 stru;
+        CombatStartData stru;
         stru.attacker = obj_dude;
         stru.defender = target;
         stru.actionPointsBonus = 0;
