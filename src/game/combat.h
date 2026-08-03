@@ -12,7 +12,7 @@
 namespace fallout {
 
 extern unsigned int combat_state;
-extern STRUCT_664980* gcsd;
+extern CombatStartData* gcsd;
 extern bool combat_call_display;
 extern int cf_table[WEAPON_CRITICAL_FAILURE_TYPE_COUNT][WEAPON_CRITICAL_FAILURE_EFFECT_COUNT];
 
