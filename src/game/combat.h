@@ -39,7 +39,7 @@ void combat(STRUCT_664980* attack);
 void combat_ctd_init(Attack* attack, Object* attacker, Object* defender, int hitMode, int hitLocation);
 int combat_attack(Object* a1, Object* a2, int hitMode, int location);
 int combat_bullet_start(const Object* a1, const Object* a2);
-void compute_explosion_on_extras(Attack* attack, int a2, bool isGrenade, int a4);
+void compute_explosion_on_extras(Attack* attack, bool isFromAttacker, bool isGrenade, bool noDamage);
 int determine_to_hit(Object* a1, Object* a2, int hitLocation, int hitMode);
 int determine_to_hit_no_range(Object* a1, Object* a2, int hitLocation, int hitMode);
 void death_checks(Attack* attack);
