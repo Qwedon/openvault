@@ -1746,7 +1746,7 @@ static int report_explosion(Attack* attack, Object* a2)
 
         if (anyDefender != NULL) {
             if (!isInCombat()) {
-                STRUCT_664980 combat;
+                CombatStartData combat;
                 combat.attacker = anyDefender;
                 combat.defender = a2;
                 combat.actionPointsBonus = 0;
