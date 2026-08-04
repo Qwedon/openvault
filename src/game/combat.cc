@@ -53,7 +53,7 @@ static void combat_begin(Object* a1);
 static void combat_begin_extra(Object* attacker);
 static void combat_over();
 static void combat_add_noncoms();
-static int compare_faster(const void* a1, const void* a2);
+static int compare_faster(const void* critter1Ptr, const void* critter2Ptr);
 static void combat_sequence_init(Object* attacker, Object* defender);
 static void combat_sequence();
 static int combat_input();
@@ -1969,12 +1969,12 @@ int combat_in_range(Object* critter)
 // Compares critters by sequence.
 //
 // 0x420288
-static int compare_faster(const void* a1, const void* a2)
+static int compare_faster(const void* critter1Ptr, const void* critter2Ptr)
 {
-    Object* v1 = *(Object**)a1;
-    Object* v2 = *(Object**)a2;
+    Object* critter1 = *(Object**)critter1Ptr;
+    Object* critter2 = *(Object**)critter2Ptr;
 
-    int sequence1 = stat_level(v1, STAT_SEQUENCE);
+    int sequence1 = stat_level(critter1, STAT_SEQUENCE);
     int sequence2 = stat_level(v2, STAT_SEQUENCE);
     if (sequence1 > sequence2) {
         return -1;
@@ -1982,8 +1982,8 @@ static int compare_faster(const void* a1, const void* a2)
         return 1;
     }
 
-    int luck1 = stat_level(v1, STAT_LUCK);
-    int luck2 = stat_level(v2, STAT_LUCK);
+    int luck1 = stat_level(critter1, STAT_LUCK);
+    int luck2 = stat_level(critter2, STAT_LUCK);
     if (luck1 > luck2) {
         return -1;
     } else if (luck1 < luck2) {
