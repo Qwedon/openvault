@@ -1975,7 +1975,7 @@ static int compare_faster(const void* critter1Ptr, const void* critter2Ptr)
     Object* critter2 = *(Object**)critter2Ptr;
 
     int sequence1 = stat_level(critter1, STAT_SEQUENCE);
-    int sequence2 = stat_level(v2, STAT_SEQUENCE);
+    int sequence2 = stat_level(critter2, STAT_SEQUENCE);
     if (sequence1 > sequence2) {
         return -1;
     } else if (sequence1 < sequence2) {
