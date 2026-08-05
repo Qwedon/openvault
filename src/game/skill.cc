@@ -434,14 +434,14 @@ static void show_skill_use_messages(Object* obj, int skill, Object* a3, int a4, 
 }
 
 // 0x498814
-int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
+int skill_use(Object* obj, Object* target, int skill, int criticalChanceModifier)
 {
     MessageListItem messageListItem;
     char text[60];
 
     bool giveExp = true;
-    int currentHp = stat_level(a2, STAT_CURRENT_HIT_POINTS);
-    int maximumHp = stat_level(a2, STAT_MAXIMUM_HIT_POINTS);
+    int currentHp = stat_level(target, STAT_CURRENT_HIT_POINTS);
+    int maximumHp = stat_level(target, STAT_MAXIMUM_HIT_POINTS);
 
     int hpToHeal = 0;
     int maximumHpToHeal = 0;
@@ -458,8 +458,8 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
     int criticalChance = stat_level(obj, STAT_CRITICAL_CHANCE) + criticalChanceModifier;
 
     int damageHealingAttempts = 1;
-    int v1 = 0;
-    int v2 = 0;
+    int successCount = 0;
+    bool skillUseSlotAdded = 0;
 
     switch (skill) {
     case SKILL_FIRST_AID:
@@ -475,7 +475,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
             return -1;
         }
 
-        if (critter_is_dead(a2)) {
+        if (critter_is_dead(target)) {
             // 512: You can't heal the dead.
             // 513: Let the dead rest in peace.
             // 514: It's dead, get over it.
@@ -491,7 +491,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
             palette_fade_to(black_palette);
 
             int roll;
-            if (critter_body_type(a2) == BODY_TYPE_ROBOTIC) {
+            if (critter_body_type(target) == BODY_TYPE_ROBOTIC) {
                 roll = ROLL_FAILURE;
             } else {
                 roll = skill_result(obj, skill, criticalChance, &hpToHeal);
@@ -499,7 +499,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
 
             if (roll == ROLL_SUCCESS || roll == ROLL_CRITICAL_SUCCESS) {
                 hpToHeal = roll_random(minimumHpToHeal + 1, maximumHpToHeal + 5);
-                critter_adjust_hits(a2, hpToHeal);
+                critter_adjust_hits(target, hpToHeal);
 
                 if (obj == obj_dude) {
                     // You heal %d hit points.
@@ -520,7 +520,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
 
                 v1 = 1;
 
-                if (a2 == obj_dude) {
+                if (target == obj_dude) {
                     intface_update_hit_points(true);
                 }
             } else {
@@ -540,15 +540,15 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
             if (obj == obj_dude) {
                 // 501: You look healty already
                 // 502: %s looks healthy already
-                messageListItem.num = (a2 == obj_dude ? 501 : 502);
+                messageListItem.num = (target == obj_dude ? 501 : 502);
                 if (!message_search(&skill_message_file, &messageListItem)) {
                     return -1;
                 }
 
-                if (a2 == obj_dude) {
+                if (target == obj_dude) {
                     strcpy(text, messageListItem.text);
                 } else {
-                    snprintf(text, sizeof(text), messageListItem.text, object_name(a2));
+                    snprintf(text, sizeof(text), messageListItem.text, object_name(target));
                 }
 
                 display_print(text);
@@ -574,7 +574,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
             return -1;
         }
 
-        if (critter_is_dead(a2)) {
+        if (critter_is_dead(target)) {
             // 512: You can't heal the dead.
             // 513: Let the dead rest in peace.
             // 514: It's dead, get over it.
@@ -585,10 +585,10 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
             break;
         }
 
-        if (currentHp < maximumHp || critter_is_crippled(a2)) {
+        if (currentHp < maximumHp || critter_is_crippled(target)) {
             palette_fade_to(black_palette);
 
-            if (critter_body_type(a2) != BODY_TYPE_ROBOTIC && critter_is_crippled(a2)) {
+            if (critter_body_type(target) != BODY_TYPE_ROBOTIC && critter_is_crippled(target)) {
                 // Damage flags which can be healed using "Doctor" skill.
                 //
                 // 0x498160
@@ -601,7 +601,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
                 };
 
                 for (int index = 0; index < HEALABLE_DAMAGE_FLAGS_LENGTH; index++) {
-                    if ((a2->data.critter.combat.results & flags[index]) != 0) {
+                    if ((target->data.critter.combat.results & flags[index]) != 0) {
                         damageHealingAttempts++;
 
                         int roll = skill_result(obj, skill, criticalChance, &hpToHeal);
@@ -619,7 +619,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
                         MessageListItem prefix;
 
                         if (roll == ROLL_SUCCESS || roll == ROLL_CRITICAL_SUCCESS) {
-                            a2->data.critter.combat.results &= ~flags[index];
+                            target->data.critter.combat.results &= ~flags[index];
 
                             // 520: You heal your %s.
                             // 521: You heal the %s.
@@ -627,12 +627,12 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
 
                             skill_use_slot_add(SKILL_DOCTOR);
 
-                            v1 = 1;
-                            v2 = 1;
+                            successCount = 1;
+                            skillUseSlotAdded = 1;
                         } else {
                             // 525: You fail to heal your %s.
                             // 526: You fail to heal the %s.
-                            prefix.num = (a2 == obj_dude ? 525 : 526);
+                            prefix.num = (target == obj_dude ? 525 : 526);
                         }
 
                         if (!message_search(&skill_message_file, &prefix)) {
@@ -641,7 +641,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
 
                         snprintf(text, sizeof(text), prefix.text, messageListItem.text);
                         display_print(text);
-                        show_skill_use_messages(obj, skill, a2, v1, criticalChanceModifier);
+                        show_skill_use_messages(obj, skill, target, successCount, criticalChanceModifier);
 
                         giveExp = false;
                     }
@@ -649,7 +649,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
             }
 
             int roll;
-            if (critter_body_type(a2) == BODY_TYPE_ROBOTIC) {
+            if (critter_body_type(target) == BODY_TYPE_ROBOTIC) {
                 roll = ROLL_FAILURE;
             } else {
                 int skillValue = skill_level(obj, skill);
@@ -658,7 +658,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
 
             if (roll == ROLL_SUCCESS || roll == ROLL_CRITICAL_SUCCESS) {
                 hpToHeal = roll_random(minimumHpToHeal + 4, maximumHpToHeal + 10);
-                critter_adjust_hits(a2, hpToHeal);
+                critter_adjust_hits(target, hpToHeal);
 
                 if (obj == obj_dude) {
                     // You heal %d hit points.
@@ -674,16 +674,16 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
                     display_print(text);
                 }
 
-                if (!v2) {
+                if (!skillUseSlotAdded) {
                     skill_use_slot_add(SKILL_DOCTOR);
                 }
 
-                if (a2 == obj_dude) {
+                if (target == obj_dude) {
                     intface_update_hit_points(true);
                 }
 
-                v1 = 1;
-                show_skill_use_messages(obj, skill, a2, v1, criticalChanceModifier);
+                successCount = 1;
+                show_skill_use_messages(obj, skill, target, successCount, criticalChanceModifier);
                 scr_exec_map_update_scripts();
                 palette_fade_to(cmap);
 
@@ -705,15 +705,15 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
             if (obj == obj_dude) {
                 // 501: You look healty already
                 // 502: %s looks healthy already
-                messageListItem.num = (a2 == obj_dude ? 501 : 502);
+                messageListItem.num = (target == obj_dude ? 501 : 502);
                 if (!message_search(&skill_message_file, &messageListItem)) {
                     return -1;
                 }
 
-                if (a2 == obj_dude) {
+                if (target == obj_dude) {
                     strcpy(text, messageListItem.text);
                 } else {
-                    snprintf(text, sizeof(text), messageListItem.text, object_name(a2));
+                    snprintf(text, sizeof(text), messageListItem.text, object_name(target));
                 }
 
                 display_print(text);
@@ -731,7 +731,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
     case SKILL_LOCKPICK:
         break;
     case SKILL_STEAL:
-        scripts_request_steal_container(obj, a2);
+        scripts_request_steal_container(obj, target);
         break;
     case SKILL_TRAPS:
         // You fail to find any traps.
@@ -767,7 +767,7 @@ int skill_use(Object* obj, Object* a2, int skill, int criticalChanceModifier)
     }
 
     if (giveExp) {
-        show_skill_use_messages(obj, skill, a2, v1, criticalChanceModifier);
+        show_skill_use_messages(obj, skill, target, successCount, criticalChanceModifier);
     }
 
     if (skill == SKILL_FIRST_AID || skill == SKILL_DOCTOR) {
