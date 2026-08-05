@@ -31,7 +31,7 @@ char* skill_name(int skill);
 char* skill_description(int skill);
 char* skill_attribute(int skill);
 int skill_pic(int skill);
-int skill_use(Object* obj, Object* a2, int skill, int a4);
+int skill_use(Object* obj, Object* target, int skill, int criticalChanceModifier);
 int skill_check_stealing(Object* a1, Object* a2, Object* item, bool isPlanting);
 int skill_use_slot_save(DB_FILE* stream);
 int skill_use_slot_load(DB_FILE* stream);
