@@ -518,7 +518,7 @@ int skill_use(Object* obj, Object* target, int skill, int criticalChanceModifier
 
                 skill_use_slot_add(SKILL_FIRST_AID);
 
-                v1 = 1;
+                successCount = 1;
 
                 if (target == obj_dude) {
                     intface_update_hit_points(true);
@@ -623,7 +623,7 @@ int skill_use(Object* obj, Object* target, int skill, int criticalChanceModifier
 
                             // 520: You heal your %s.
                             // 521: You heal the %s.
-                            prefix.num = (a2 == obj_dude ? 520 : 521);
+                            prefix.num = (target == obj_dude ? 520 : 521);
 
                             skill_use_slot_add(SKILL_DOCTOR);
 
