@@ -344,7 +344,9 @@ jobs:
 
       - name: Remove old version
         if: ${{ always() && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-        run: gh release delete $TAG --yes --cleanup-tag
+        uses: sgpublic/delete-release-action@v1.2
+        with:
+          pre-release-drop: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
