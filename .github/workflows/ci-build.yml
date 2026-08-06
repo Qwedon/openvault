@@ -26,7 +26,7 @@ jobs:
           sudo apt install cppcheck
 
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: cppcheck
         run: cppcheck --std=c++17 src/
@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: clang-format
         run: find src -type f -name \*.cc -o -name \*.h | xargs clang-format --dry-run --Werror
@@ -50,17 +50,17 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 11
           cache: gradle
 
       - name: Cache cmake build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: os/android/app/.cxx
           key: android-cmake-v101
@@ -81,7 +81,7 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: fallout-ce-debug.apk
           path: os/android/app/build/outputs/apk/debug/app-debug.apk
@@ -94,10 +94,10 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Cache cmake build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: out
           key: ios-cmake-v5
@@ -116,7 +116,7 @@ jobs:
           cpack -C Debug
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: fallout-ce.ipa
           path:  out/build/ios/fallout-ce.ipa
@@ -136,7 +136,7 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Dependencies (x86)
         if: matrix.arch == 'x86'
@@ -152,7 +152,7 @@ jobs:
           sudo apt install libsdl2-dev zlib1g-dev
 
       - name: Cache cmake build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: out
           key: linux-${{ matrix.arch }}-cmake-v101
@@ -170,7 +170,7 @@ jobs:
           tar -czvf out/build/linux-${{ matrix.arch }}-debug/fallout-ce-linux-${{ matrix.arch }}.tar.gz -C out/build/linux-${{ matrix.arch }}-debug fallout-ce
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: fallout-ce-linux-${{ matrix.arch }}
           path: out/build/linux-${{ matrix.arch }}-debug/fallout-ce-linux-${{ matrix.arch }}.tar.gz
@@ -190,7 +190,7 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Dependencies (armhf)
         if: matrix.arch == 'armhf'
@@ -206,7 +206,7 @@ jobs:
           sudo apt install libsdl2-dev zlib1g-dev
 
       - name: Cache cmake build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: build
           key: linux-${{ matrix.arch }}-cmake-v101
@@ -244,7 +244,7 @@ jobs:
           tar -czvf build/fallout-ce-linux-${{ matrix.arch }}.tar.gz -C build fallout-ce
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: fallout-ce-linux-${{ matrix.arch }}
           path: build/fallout-ce-linux-${{ matrix.arch }}.tar.gz
@@ -257,10 +257,10 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Cache cmake build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: out
           key: macos-cmake-v6
@@ -279,7 +279,7 @@ jobs:
           cpack -C Debug
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: fallout-ce-macos.dmg
           path:  out/build/macos/Fallout Community Edition.dmg
@@ -301,10 +301,10 @@ jobs:
 
     steps:
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
      
       - name: Cache cmake build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: out
           key: windows-${{ matrix.arch }}-cmake-v103
@@ -323,7 +323,7 @@ jobs:
           7z a fallout-ce-windows-${{ matrix.arch }}.zip fallout-ce.exe
         
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: fallout-ce-windows-${{ matrix.arch }}
           path: out/build/windows-${{ matrix.arch }}/Debug/fallout-ce-windows-${{ matrix.arch }}.zip
@@ -338,7 +338,7 @@ jobs:
     steps:
       - name: Search artifacts
         if: ${{ always() && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-        uses: actions/download-artifact@v4.3.0
+        uses: actions/download-artifact@v7
         with:
           path: artifacts/
 
@@ -392,7 +392,7 @@ jobs:
 
       - name: Upload new release
         if: ${{ always() && github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-        uses: softprops/action-gh-release@v2.6.2
+        uses: softprops/action-gh-release@v3.0.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: artifacts/*
