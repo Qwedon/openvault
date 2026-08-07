@@ -884,32 +884,30 @@ int tile_num_in_direction(int tile, int rotation, int distance)
 // 0x49E5C0
 int tile_dir(int tile1, int tile2)
 {
-    int x1;
-    int y1;
+    int x1, y1;
     tile_coord(tile1, &x1, &y1, 0);
 
-    int x2;
-    int y2;
+    int x2, y2;
     tile_coord(tile2, &x2, &y2, 0);
 
     int dy = y2 - y1;
-    x2 -= x1;
-    y2 -= y1;
+    int dx = x2 - x1;
 
-    if (x2 != 0) {
-        // TODO: Check.
-        int v6 = (int)trunc(atan2((double)-dy, (double)x2) * 180.0 * 0.3183098862851122);
-        int v7 = 360 - (v6 + 180) - 90;
-        if (v7 < 0) {
-            v7 += 360;
+    if (dx != 0) {
+        // Radians -> Degrees
+        int raw = (int)trunc(atan2((double)-dy, (double)dx) * 180.0 / M_PI);
+        int angle = 360 - (raw + 180) - 90;
+        if (angle < 0) {
+            angle += 360;
         }
 
-        v7 /= 60;
+        // Convert from degrees to hex direction.
+        angle /= 60;
 
-        if (v7 >= ROTATION_COUNT) {
-            v7 = ROTATION_NW;
+        if (angle >= ROTATION_COUNT) {
+            angle = ROTATION_NW;
         }
-        return v7;
+        return angle;
     }
 
     return dy < 0 ? ROTATION_NE : ROTATION_SE;
