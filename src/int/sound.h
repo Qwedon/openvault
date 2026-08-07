@@ -114,7 +114,7 @@ typedef struct Sound {
     unsigned int lastPosition;
     int numBuffers;
     int dataSize;
-    int field_80;
+    void* userData;
     void* callbackUserData;
     SoundCallback* callback;
     void* deleteUserData;
