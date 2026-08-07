@@ -201,13 +201,11 @@ void mouse_get_shape(unsigned char** buf, int* width, int* length, int* full, in
 int mouse_set_shape(unsigned char* buf, int width, int length, int full, int hotx, int hoty, char trans)
 {
     Rect rect;
-    unsigned char* v9;
-    int v11, v12;
-    int v7, v8;
+    unsigned char* cursor_frame;
+    int hotx_delta;
+    int hoty_delta;
 
-    v7 = hotx;
-    v8 = hoty;
-    v9 = buf;
+    cursor_frame = buf;
 
     if (buf == NULL) {
         // NOTE: Original code looks tail recursion optimization.
@@ -240,7 +238,7 @@ int mouse_set_shape(unsigned char* buf, int width, int length, int full, int hot
     mouse_width = width;
     mouse_length = length;
     mouse_full = full;
-    mouse_shape = v9;
+    mouse_shape = cursor_frame;
     mouse_trans = trans;
 
     if (mouse_fptr) {
@@ -248,15 +246,15 @@ int mouse_set_shape(unsigned char* buf, int width, int length, int full, int hot
         mouse_fptr = NULL;
     }
 
-    v11 = mouse_hotx - v7;
-    mouse_hotx = v7;
+    hotx_delta = mouse_hotx - hotx;
+    mouse_hotx = hotx;
 
-    mouse_x += v11;
+    mouse_x += hotx_delta;
 
-    v12 = mouse_hoty - v8;
-    mouse_hoty = v8;
+    hoty_delta = mouse_hoty - hoty;
+    mouse_hoty = hoty;
 
-    mouse_y += v12;
+    mouse_y += hoty_delta;
 
     mouse_clip();
 
