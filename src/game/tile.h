@@ -35,7 +35,7 @@ int tile_dist(int a1, int a2);
 bool tile_in_front_of(int tile1, int tile2);
 bool tile_to_right_of(int tile1, int tile2);
 int tile_num_in_direction(int tile, int rotation, int distance);
-int tile_dir(int a1, int a2);
+int tile_dir(int tile1, int tile2);
 int tile_num_beyond(int from, int to, int distance);
 void tile_enable_scroll_blocking();
 void tile_disable_scroll_blocking();
