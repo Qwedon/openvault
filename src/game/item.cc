@@ -2147,25 +2147,23 @@ static int insert_drug_effect(Object* critter, Object* item, int duration, int* 
 // 0x46BEEC
 static void perform_drug_effect(Object* critter, int* stats, int* mods, bool isImmediate)
 {
-    int v10;
-    int v11;
-    int v12;
     MessageListItem messageListItem;
     const char* name;
     const char* text;
-    char v24[92]; // TODO: Size is probably wrong.
-    char str[92]; // TODO: Size is probably wrong.
+    char msgBuf[92]; // TODO: Size is probably wrong.
 
     bool statsChanged = false;
 
-    int v5 = 0;
-    bool v32 = false;
+    int startIndex = 0;
+    bool firstStatIsMinimum = false;
     if (stats[0] == -2) {
-        v5 = 1;
-        v32 = true;
+        startIndex = 1;
+        firstStatIsMinimum = true;
     }
 
-    for (int index = v5; index < 3; index++) {
+    for (int index = startIndex; index < 3; index++) {
+        int oldStatBonus;
+        int statBonus;
         int stat = stats[index];
         if (stat == -1) {
             continue;
@@ -2175,31 +2173,29 @@ static void perform_drug_effect(Object* critter, int* stats, int* mods, bool isI
             critter->data.critter.combat.maneuver &= ~CRITTER_MANUEVER_FLEEING;
         }
 
-        v10 = stat_get_bonus(critter, stat);
+        oldStatBonus = stat_get_bonus(critter, stat);
 
-        int before;
-        if (critter == obj_dude) {
-            before = stat_level(obj_dude, stat);
-        }
+        int before = (critter == obj_dude)
+            ? stat_level(obj_dude, stat) : 0;
 
-        if (v32) {
-            v11 = roll_random(mods[index - 1], mods[index]) + v10;
-            v32 = false;
+        if (firstStatIsMinimum) {
+            statBonus = roll_random(mods[index - 1], mods[index]) + oldStatBonus;
+            firstStatIsMinimum = false;
         } else {
-            v11 = mods[index] + v10;
+            statBonus = mods[index] + oldStatBonus;
         }
 
         if (stat == STAT_CURRENT_HIT_POINTS) {
-            v12 = stat_get_base(critter, STAT_CURRENT_HIT_POINTS);
-            if (v11 + v12 <= 0 && critter != obj_dude) {
+            int currentHp = stat_get_base(critter, STAT_CURRENT_HIT_POINTS);
+            if (statBonus + currentHp <= 0 && critter != obj_dude) {
                 name = critter_name(critter);
                 // %s succumbs to the adverse effects of chems.
                 text = getmsg(&item_message_file, &messageListItem, 600);
-                snprintf(v24, sizeof(v24), text, name);
+                snprintf(msgBuf, sizeof(msgBuf), text, name);
             }
         }
 
-        stat_set_bonus(critter, stat, v11);
+        stat_set_bonus(critter, stat, statBonus);
 
         if (critter == obj_dude) {
             if (stat == STAT_CURRENT_HIT_POINTS) {
@@ -2213,8 +2209,8 @@ static void perform_drug_effect(Object* critter, int* stats, int* mods, bool isI
                 messageListItem.num = after < before ? 2 : 1;
                 if (message_search(&item_message_file, &messageListItem)) {
                     char* statName = stat_name(stat);
-                    snprintf(str, sizeof(str), messageListItem.text, after < before ? before - after : after - before, statName);
-                    display_print(str);
+                    snprintf(msgBuf, sizeof(msgBuf), messageListItem.text, after < before ? before - after : after - before, statName);
+                    display_print(msgBuf);
                     statsChanged = true;
                 }
             }
@@ -2234,14 +2230,14 @@ static void perform_drug_effect(Object* critter, int* stats, int* mods, bool isI
             // You suffer a fatal heart attack from chem overdose.
             messageListItem.num = 4;
             if (message_search(&item_message_file, &messageListItem)) {
-                strcpy(v24, messageListItem.text);
+                strcpy(msgBuf, messageListItem.text);
                 // TODO: Why message is ignored?
             }
         } else {
             name = critter_name(critter);
             // %s succumbs to the adverse effects of chems.
             text = getmsg(&item_message_file, &messageListItem, 600);
-            snprintf(v24, sizeof(v24), text, name);
+            snprintf(msgBuf, sizeof(msgBuf), text, name);
             // TODO: Why message is ignored?
         }
     }
