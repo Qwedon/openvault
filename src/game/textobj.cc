@@ -186,7 +186,7 @@ unsigned int text_object_get_line_delay()
 }
 
 // 0x49CFB4
-int text_object_create(Object* object, char* string, int font, int color, int a5, Rect* rect)
+int text_object_create(Object* object, char* string, int font, int color, int outlineColor, Rect* rect)
 {
     if (!text_object_initialized) {
         return -1;
@@ -249,7 +249,7 @@ int text_object_create(Object* object, char* string, int font, int color, int a5
 
     textObject->height = (text_height() + 1) * textObject->linesCount;
 
-    if (a5 != -1) {
+    if (outlineColor != -1) {
         textObject->width += 2;
         textObject->height += 2;
     }
@@ -266,7 +266,7 @@ int text_object_create(Object* object, char* string, int font, int color, int a5
     unsigned char* dest = textObject->data;
     int skip = textObject->width * (text_height() + 1);
 
-    if (a5 != -1) {
+    if (outlineColor != -1) {
         dest += textObject->width;
     }
 
@@ -288,8 +288,8 @@ int text_object_create(Object* object, char* string, int font, int color, int a5
         dest += skip;
     }
 
-    if (a5 != -1) {
-        buf_outline(textObject->data, textObject->width, textObject->height, textObject->width, a5);
+    if (outlineColor != -1) {
+        buf_outline(textObject->data, textObject->width, textObject->height, textObject->width, outlineColor);
     }
 
     if (object != NULL) {
