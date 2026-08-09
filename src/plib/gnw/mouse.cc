@@ -419,6 +419,9 @@ void mouse_info()
         return;
     }
 
+    // FIXME: Need to know a workaround between the Mouse not being locked
+    // inside window in PC and the Touch not being broken on Mobile devices.
+
     Gesture gesture;
     if (touch_get_gesture(&gesture)) {
         static int prevx;
