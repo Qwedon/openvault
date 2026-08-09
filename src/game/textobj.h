@@ -16,7 +16,7 @@ void text_object_set_base_delay(double value);
 unsigned int text_object_get_base_delay();
 void text_object_set_line_delay(double value);
 unsigned int text_object_get_line_delay();
-int text_object_create(Object* object, char* string, int font, int color, int a5, Rect* rect);
+int text_object_create(Object* object, char* string, int font, int color, int outlineColor, Rect* rect);
 void text_object_render(Rect* rect);
 int text_object_count();
 void text_object_remove(Object* object);
