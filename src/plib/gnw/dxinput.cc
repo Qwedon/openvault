@@ -70,9 +70,6 @@ bool dxinput_get_mouse_state(MouseData* mouseState)
     // handled by SDL yet.
     SDL_PumpEvents();
 
-    // FIXME: Need to know a workaround between the Mouse not being locked
-    // inside window in PC and the Touch not being broken on Mobile devices.
-
     // Get absolute window mouse position
     Uint32 buttons = SDL_GetMouseState(&(mouseState->x), &(mouseState->y));
 
