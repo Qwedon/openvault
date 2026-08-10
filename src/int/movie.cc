@@ -44,7 +44,7 @@ static int blitAlpha(int win, unsigned char* data, int width, int height, int pi
 static int movieScaleWindow(int win, unsigned char* data, int width, int height, int pitch);
 static int blitNormal(int win, unsigned char* data, int width, int height, int pitch);
 static void movieSetPalette(unsigned char* palette, int start, int end);
-static void cleanupMovie(int a1);
+static void cleanupMovie(bool shouldEndMovie);
 static void cleanupLast();
 static DB_FILE* openFile(char* filePath);
 static void openSubtitle(char* filePath);
@@ -248,8 +248,8 @@ static bool movieRead(void* handle, void* buf, int count)
 // 0x478464
 static void movieDirect(SDL_Surface* surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9)
 {
-    int v14;
-    int v15;
+    int movWinWidth;
+    int movWinSpan;
 
     SDL_Rect srcRect;
     srcRect.x = srcX;
@@ -257,15 +257,15 @@ static void movieDirect(SDL_Surface* surface, int srcWidth, int srcHeight, int s
     srcRect.w = srcWidth;
     srcRect.h = srcHeight;
 
-    v14 = winRect.lrx - winRect.ulx;
-    v15 = winRect.lrx - winRect.ulx + 1;
+    movWinWidth = winRect.lrx - winRect.ulx;
+    movWinSpan = movWinWidth + 1;
 
     SDL_Rect destRect;
 
     if (movieScaleFlag) {
         if ((movieFlags & MOVIE_EXTENDED_FLAG_0x08) != 0) {
             destRect.y = (winRect.lry - winRect.uly + 1 - destHeight) / 2;
-            destRect.x = (v15 - 4 * srcWidth / 3) / 2;
+            destRect.x = (movWinSpan - 4 * srcWidth / 3) / 2;
         } else {
             destRect.y = movieY + winRect.uly;
             destRect.x = winRect.ulx + movieX;
@@ -276,7 +276,7 @@ static void movieDirect(SDL_Surface* surface, int srcWidth, int srcHeight, int s
     } else {
         if ((movieFlags & MOVIE_EXTENDED_FLAG_0x08) != 0) {
             destRect.y = (winRect.lry - winRect.uly + 1 - destHeight) / 2;
-            destRect.x = (v15 - destWidth) / 2;
+            destRect.x = (movWinSpan - destWidth) / 2;
         } else {
             destRect.y = movieY + winRect.uly;
             destRect.x = winRect.ulx + movieX;
@@ -486,7 +486,7 @@ void initMovie()
 }
 
 // 0x478CA8
-static void cleanupMovie(int a1)
+static void cleanupMovie(bool shouldEndMovie)
 {
     if (!running) {
         return;
@@ -512,7 +512,7 @@ static void cleanupMovie(int a1)
         gMovieSdlSurface = NULL;
     }
 
-    if (a1) {
+    if (shouldEndMovie) {
         _MVE_rmEndMovie();
     }
 
