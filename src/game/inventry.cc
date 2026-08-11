@@ -188,7 +188,7 @@ typedef enum InventoryArrowFrm {
 } InventoryArrowFrm;
 
 typedef struct InventoryWindowConfiguration {
-    int field_0; // artId
+    int frmId; // artId
     int width;
     int height;
     int x;
@@ -641,7 +641,7 @@ bool setup_inventory(int inventoryWindowType)
         i_wid_max_y = windowDescription->height + inventoryWindowY;
 
         unsigned char* dest = win_get_buf(i_wid);
-        int backgroundFid = art_id(OBJ_TYPE_INTERFACE, windowDescription->field_0, 0, 0, 0);
+        int backgroundFid = art_id(OBJ_TYPE_INTERFACE, windowDescription->frmId, 0, 0, 0);
 
         CacheEntry* backgroundFrmHandle;
         unsigned char* backgroundFrmData = art_ptr_lock_data(backgroundFid, 0, 0, &backgroundFrmHandle);
@@ -3480,7 +3480,7 @@ void inven_action_cursor(int keyCode, int inventoryWindowType)
             windowBuffer + windowDescription->width * rect.uly + rect.ulx,
             windowDescription->width);
     } else {
-        int backgroundFid = art_id(OBJ_TYPE_INTERFACE, windowDescription->field_0, 0, 0, 0);
+        int backgroundFid = art_id(OBJ_TYPE_INTERFACE, windowDescription->frmId, 0, 0, 0);
         CacheEntry* backgroundFrmHandle;
         unsigned char* backgroundFrmData = art_ptr_lock_data(backgroundFid, 0, 0, &backgroundFrmHandle);
         buf_to_buf(backgroundFrmData + windowDescription->width * rect.uly + rect.ulx,
@@ -5254,7 +5254,7 @@ static int setup_move_timer_win(int inventoryWindowType, Object* item)
     unsigned char* windowBuffer = win_get_buf(mt_wid);
 
     CacheEntry* backgroundHandle;
-    int backgroundFid = art_id(OBJ_TYPE_INTERFACE, windowDescription->field_0, 0, 0, 0);
+    int backgroundFid = art_id(OBJ_TYPE_INTERFACE, windowDescription->frmId, 0, 0, 0);
     unsigned char* backgroundData = art_ptr_lock_data(backgroundFid, 0, 0, &backgroundHandle);
     if (backgroundData != NULL) {
         buf_to_buf(backgroundData, windowDescription->width, windowDescription->height, windowDescription->width, windowBuffer, windowDescription->width);
