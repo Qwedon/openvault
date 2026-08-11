@@ -2442,7 +2442,7 @@ static int anim_move(Object* obj, int tile, int elev, int a3, int anim, int a5, 
         return -1;
     }
 
-    // note: a3 is always passed in as -1.
+    // NOTE: a3 is always passed in as -1.
     // It's possible that it was meant to be actionPoints,
     // and that functionality lives in anim_move_to_object.
     if (a3 != -1 && sad_entry->length > a3) {
