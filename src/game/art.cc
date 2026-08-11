@@ -1028,7 +1028,7 @@ static int art_readSubFrameData(unsigned char* data, DB_FILE* stream, int count,
 // 0x41945C
 static int art_readFrameData(Art* art, DB_FILE* stream)
 {
-    if (db_freadInt32(stream, &(art->field_0)) == -1) return -1;
+    if (db_freadInt32(stream, &(art->version)) == -1) return -1;
     if (db_freadInt16(stream, &(art->framesPerSecond)) == -1) return -1;
     if (db_freadInt16(stream, &(art->actionFrame)) == -1) return -1;
     if (db_freadInt16(stream, &(art->frameCount)) == -1) return -1;
@@ -1129,7 +1129,7 @@ static int art_writeSubFrameData(unsigned char* data, DB_FILE* stream, int count
 // 0x419778
 static int art_writeFrameData(Art* art, DB_FILE* stream)
 {
-    if (db_fwriteInt32(stream, art->field_0) == -1) return -1;
+    if (db_fwriteInt32(stream, art->version) == -1) return -1;
     if (db_fwriteInt16(stream, art->framesPerSecond) == -1) return -1;
     if (db_fwriteInt16(stream, art->actionFrame) == -1) return -1;
     if (db_fwriteInt16(stream, art->frameCount) == -1) return -1;
