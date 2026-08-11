@@ -558,7 +558,7 @@ int art_get_code(int animation, int weaponType, char* a3, char* a4)
 // 0x418BFC
 char* art_get_name(int fid)
 {
-    int v1 = (fid & 0x70000000) >> 28;
+    int rotation = (fid & 0x70000000) >> 28;
 
     int alias_fid = art_alias_fid(fid);
     if (alias_fid != -1) {
@@ -588,7 +588,7 @@ char* art_get_name(int fid)
             return NULL;
         }
 
-        if (v1) {
+        if (rotation != 0) {
             snprintf(art_name, sizeof(art_name),
                 "%s%s%s\\%s%c%c.fr%c",
                 cd_path_base,
@@ -984,7 +984,8 @@ static int art_id_internal(unsigned short frmId, unsigned char weaponCode, unsig
 int art_id(int objectType, int frmId, int animType, int weaponCode, int rotation)
 {
     // Always use rotation 0 (NE) for non-critters, for certain critter animations.
-    // For other critter animations, check if art for the given rotation exists, if not try rotation 1 (E) and if that also doesn't exist, then default to 0 (NE).
+    // For other critter animations, check if art for the given rotation exists,
+    // if not try rotation 1 (E) and if that also doesn't exist, then default to 0 (NE).
     if (objectType != OBJ_TYPE_CRITTER
         || animType == ANIM_FIRE_DANCE
         || animType < ANIM_FALL_BACK
