@@ -558,28 +558,19 @@ int art_get_code(int animation, int weaponType, char* a3, char* a4)
 // 0x418BFC
 char* art_get_name(int fid)
 {
-    int alias_fid;
-    int index;
-    int anim;
-    int weapon_anim;
-    int type;
-    int v1;
-    char code1;
-    char code2;
+    int v1 = (fid & 0x70000000) >> 28;
 
-    v1 = (fid & 0x70000000) >> 28;
-
-    alias_fid = art_alias_fid(fid);
+    int alias_fid = art_alias_fid(fid);
     if (alias_fid != -1) {
         fid = alias_fid;
     }
 
     *art_name = '\0';
 
-    index = fid & 0xFFF;
-    anim = FID_ANIM_TYPE(fid);
-    weapon_anim = (fid & 0xF000) >> 12;
-    type = FID_TYPE(fid);
+    int index = fid & 0xFFF;
+    int anim = FID_ANIM_TYPE(fid);
+    int weapon_anim = (fid & 0xF000) >> 12;
+    int type = FID_TYPE(fid);
 
     if (index >= art[type].fileNamesLength) {
         return NULL;
@@ -591,6 +582,8 @@ char* art_get_name(int fid)
 
     switch (type) {
     case OBJ_TYPE_CRITTER:
+        char code1;
+        char code2;
         if (art_get_code(anim, weapon_anim, &code1, &code2) == -1) {
             return NULL;
         }
