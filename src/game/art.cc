@@ -597,7 +597,7 @@ char* art_get_name(int fid)
                 art[OBJ_TYPE_CRITTER].fileNames + index * 13,
                 code1,
                 code2,
-                v1 + 47);
+                rotation + 47);
         } else {
             snprintf(art_name, sizeof(art_name),
                 "%s%s%s\\%s%c%c.frm",
