@@ -1,0 +1,5 @@
+CompileFlags:
+  CompilationDatabase: out/build/windows-x64-clangd
+
+Diagnostics:
+  UnusedIncludes: None

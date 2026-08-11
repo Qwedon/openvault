@@ -40,6 +40,18 @@
             "architecture": "x64"
         },
         {
+            "name": "windows-x64-clangd",
+            "displayName": "Windows x64 (clangd / Ninja)",
+            "description": "Ninja + MSVC build used only to generate compile_commands.json for clangd. Copy CMakeUserPresets.json.example to CMakeUserPresets.json and set CMAKE_MAKE_PROGRAM. Configure with the windows-x64-clangd-local preset from x64 Native Tools Command Prompt or a CMake VS kit.",
+            "inherits": [
+                "windows-base"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
             "name": "linux-base",
             "hidden": true,
             "inherits": [
@@ -231,6 +243,10 @@
             "name": "windows-x64-release",
             "configurePreset": "windows-x64",
             "configuration": "Release"
+        },
+        {
+            "name": "windows-x64-clangd",
+            "configurePreset": "windows-x64-clangd"
         },
         {
             "name": "linux-x86-debug",

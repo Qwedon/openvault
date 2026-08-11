@@ -1,0 +1,24 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 19,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "windows-x64-clangd-local",
+            "inherits": "windows-x64-clangd",
+            "binaryDir": "${sourceDir}/out/build/windows-x64-clangd",
+            "cacheVariables": {
+                "CMAKE_MAKE_PROGRAM": "C:/path/to/ninja.exe"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "windows-x64-clangd-local",
+            "configurePreset": "windows-x64-clangd-local"
+        }
+    ]
+}
