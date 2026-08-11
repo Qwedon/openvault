@@ -3317,7 +3317,7 @@ static int check_gravity(int tile, int elevation)
         tile_coord(tile, &x, &y, elevation);
 
         int squareTile = square_num(x + 2, y + 8, elevation);
-        int fid = art_id(OBJ_TYPE_TILE, square[elevation]->step[squareTile] & 0xFFF, 0, 0, 0);
+        int fid = art_id(OBJ_TYPE_TILE, square[elevation]->field_0[squareTile] & 0xFFF, 0, 0, 0);
         if (fid != art_id(OBJ_TYPE_TILE, 1, 0, 0, 0)) {
             break;
         }
