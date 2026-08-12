@@ -1591,6 +1591,13 @@ bool is_within_perception(Object* critter1, Object* critter2)
     int perception;
     int max_distance;
 
+    // Elevations share one hex grid, so obj_dist is elevation-blind. Without
+    // this, critters on other Vault floors can "perceive" the player when their
+    // tile numbers happen to be nearby (e.g. elev 2 rat vs elev 0 dude).
+    if (critter1->elevation != critter2->elevation) {
+        return false;
+    }
+
     distance = obj_dist(critter2, critter1);
     perception = stat_level(critter1, STAT_PERCEPTION);
     if (can_see(critter1, critter2)) {

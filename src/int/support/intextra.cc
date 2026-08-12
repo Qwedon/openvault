@@ -1485,6 +1485,15 @@ static void op_attack(Program* program)
         return;
     }
 
+    // Critter scripts run for every elevation; without this, rats on other
+    // floors can attack the player on the current floor.
+    if (self->elevation != target->elevation || self->elevation != map_elevation) {
+        dbg_print_com_data(self, target);
+        debug_printf("\n   But attacker/target are on different elevation (ignored)");
+        program->flags &= ~PROGRAM_FLAG_0x20;
+        return;
+    }
+
     if (!critter_is_active(self)) {
         dbg_print_com_data(self, target);
         debug_printf("\n   But is already Inactive (Dead/Stunned)");
@@ -3702,6 +3711,15 @@ static void op_attack_setup(Program* program)
     program->flags |= PROGRAM_FLAG_0x20;
 
     if (attacker != NULL) {
+        if (defender == NULL
+            || attacker->elevation != defender->elevation
+            || attacker->elevation != map_elevation) {
+            dbg_print_com_data(attacker, defender);
+            debug_printf("\n   But attacker/target are on different elevation (ignored)");
+            program->flags &= ~PROGRAM_FLAG_0x20;
+            return;
+        }
+
         if (!critter_is_active(attacker)) {
             dbg_print_com_data(attacker, defender);
             debug_printf("\n   But is already dead");
