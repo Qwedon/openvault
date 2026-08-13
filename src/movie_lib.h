@@ -14,7 +14,6 @@ typedef void(MveSetPaletteFunc)(unsigned char* palette, int start, int count);
 void MveSetMemory(MveMallocFunc* malloc_func, MveFreeFunc* free_func);
 void MveSetIO(MveReadFunc* read_func);
 void MveSetVolume(int volume);
-void movieLibSetPan(int pan);
 void MveSetScreenSize(int width, int height);
 void MveSetShowFrame(MveShowFrameFunc* proc);
 void MveSetPalette(MveSetPaletteFunc* set_palette_func);
