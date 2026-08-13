@@ -35,8 +35,8 @@ typedef struct MovieSubtitleListNode {
 static void* movieMalloc(size_t size);
 static void movieFree(void* ptr);
 static bool movieRead(void* handle, void* buf, int count);
-static void movieDirect(SDL_Surface* surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9);
-static void movieBuffered(SDL_Surface* surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9);
+static void movieDirect(unsigned char* pixels, int src_width, int src_height, int src_x, int src_y, int dst_width, int dst_height, int dst_x, int dst_y);
+static void movieBuffered(unsigned char* pixels, int src_width, int src_height, int src_x, int src_y, int dst_width, int dst_height, int dst_x, int dst_y);
 static int movieScaleSubRect(int win, unsigned char* data, int width, int height, int pitch);
 static int movieScaleWindowAlpha(int win, unsigned char* data, int width, int height, int pitch);
 static int movieScaleSubRectAlpha(int win, unsigned char* data, int width, int height, int pitch);
@@ -206,7 +206,7 @@ static DB_FILE* alphaHandle;
 // 0x637418
 static unsigned char* alphaBuf;
 
-static SDL_Surface* gMovieSdlSurface = NULL;
+static unsigned char* MVE_lastBuffer = NULL;
 
 // 0x4783F0
 void movieSetPreDrawFunc(MoviePreDrawFunc* func)
@@ -246,16 +246,16 @@ static bool movieRead(void* handle, void* buf, int count)
 }
 
 // 0x478464
-static void movieDirect(SDL_Surface* surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9)
+static void movieDirect(unsigned char* pixels, int src_width, int src_height, int src_x, int src_y, int dst_width, int dst_height, int dst_x, int dst_y)
 {
     int movWinWidth;
     int movWinSpan;
 
     SDL_Rect srcRect;
-    srcRect.x = srcX;
-    srcRect.y = srcY;
-    srcRect.w = srcWidth;
-    srcRect.h = srcHeight;
+    srcRect.x = src_x;
+    srcRect.y = src_y;
+    srcRect.w = src_width;
+    srcRect.h = src_height;
 
     movWinWidth = winRect.lrx - winRect.ulx;
     movWinSpan = movWinWidth + 1;
@@ -264,35 +264,35 @@ static void movieDirect(SDL_Surface* surface, int srcWidth, int srcHeight, int s
 
     if (movieScaleFlag) {
         if ((movieFlags & MOVIE_EXTENDED_FLAG_0x08) != 0) {
-            destRect.y = (winRect.lry - winRect.uly + 1 - destHeight) / 2;
-            destRect.x = (movWinSpan - 4 * srcWidth / 3) / 2;
+            destRect.y = (winRect.lry - winRect.uly + 1 - dst_height) / 2;
+            destRect.x = (movWinSpan - 4 * src_width / 3) / 2;
         } else {
             destRect.y = movieY + winRect.uly;
             destRect.x = winRect.ulx + movieX;
         }
 
-        destRect.w = 4 * srcWidth / 3 + destRect.x;
-        destRect.h = destHeight + destRect.y;
+        destRect.w = 4 * src_width / 3 + destRect.x;
+        destRect.h = dst_height + destRect.y;
     } else {
         if ((movieFlags & MOVIE_EXTENDED_FLAG_0x08) != 0) {
-            destRect.y = (winRect.lry - winRect.uly + 1 - destHeight) / 2;
-            destRect.x = (movWinSpan - destWidth) / 2;
+            destRect.y = (winRect.lry - winRect.uly + 1 - dst_height) / 2;
+            destRect.x = (movWinSpan - dst_width) / 2;
         } else {
             destRect.y = movieY + winRect.uly;
             destRect.x = winRect.ulx + movieX;
         }
-        destRect.w = destWidth;
-        destRect.h = destHeight;
+        destRect.w = dst_width;
+        destRect.h = dst_height;
     }
 
-    lastMovieSX = srcX;
-    lastMovieSY = srcY;
+    lastMovieSX = src_x;
+    lastMovieSY = src_y;
     lastMovieX = destRect.x;
     lastMovieY = destRect.y;
-    lastMovieBH = srcHeight;
+    lastMovieBH = src_height;
     lastMovieW = destRect.w;
-    gMovieSdlSurface = surface;
-    lastMovieBW = srcWidth;
+    MVE_lastBuffer = pixels;
+    lastMovieBW = src_width;
     lastMovieH = destRect.h;
 
     destRect.x += winRect.ulx;
@@ -312,42 +312,36 @@ static void movieDirect(SDL_Surface* surface, int srcWidth, int srcHeight, int s
         }
     }
 
-    SDL_SetSurfacePalette(surface, gSdlSurface->format->palette);
-    SDL_BlitSurface(surface, &srcRect, gSdlSurface, &destRect);
-    SDL_BlitSurface(gSdlSurface, NULL, gSdlTextureSurface, NULL);
+    scr_blit(pixels, src_width, src_height, src_x, src_y, dst_width, dst_height, dst_x, dst_y);
     renderPresent();
 }
 
 // 0x478710
-static void movieBuffered(SDL_Surface* surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9)
+static void movieBuffered(unsigned char* pixels, int src_width, int src_height, int src_x, int src_y, int dst_width, int dst_height, int dst_x, int dst_y)
 {
     if (GNWWin == -1) {
         return;
     }
 
-    lastMovieBW = srcWidth;
-    gMovieSdlSurface = surface;
-    lastMovieBH = srcWidth;
-    lastMovieW = destWidth;
-    lastMovieH = destHeight;
-    lastMovieX = srcX;
-    lastMovieY = srcY;
-    lastMovieSX = srcX;
-    lastMovieSY = srcY;
-
-    if (SDL_LockSurface(surface) != 0) {
-        return;
-    }
+    lastMovieBW = src_width;
+    MVE_lastBuffer = pixels;
+    lastMovieBH = src_width;
+    lastMovieW = dst_width;
+    lastMovieH = dst_height;
+    lastMovieX = src_x;
+    lastMovieY = src_y;
+    lastMovieSX = src_x;
+    lastMovieSY = src_y;
 
     if (movieCaptureFrameFunc != NULL) {
-        movieCaptureFrameFunc(static_cast<unsigned char*>(surface->pixels), srcWidth, srcHeight, surface->pitch, movieRect.ulx, movieRect.uly, destWidth, destHeight);
+        movieCaptureFrameFunc(pixels, src_width, src_height, src_width, movieRect.ulx, movieRect.uly, dst_width, dst_height);
     }
 
     if (movieFrameGrabFunc != NULL) {
-        movieFrameGrabFunc(static_cast<unsigned char*>(surface->pixels), srcWidth, srcHeight, surface->pitch);
+        movieFrameGrabFunc(pixels, src_width, src_height, src_width);
     } else {
         MovieBlitFunc* func = showFrameFuncs[movieAlphaFlag][movieScaleFlag][movieSubRectFlag];
-        if (func(GNWWin, static_cast<unsigned char*>(surface->pixels), srcWidth, srcHeight, surface->pitch) != 0) {
+        if (func(GNWWin, pixels, src_width, src_height, src_width) != 0) {
             if (preDrawFunc != NULL) {
                 preDrawFunc(GNWWin, &movieRect);
             }
@@ -355,8 +349,6 @@ static void movieBuffered(SDL_Surface* surface, int srcWidth, int srcHeight, int
             win_draw_rect(GNWWin, &movieRect);
         }
     }
-
-    SDL_UnlockSurface(surface);
 }
 
 // 0x4788A8
@@ -506,10 +498,10 @@ static void cleanupMovie(bool shouldEndMovie)
         lastMovieBuffer = NULL;
     }
 
-    if (gMovieSdlSurface != NULL) {
+    if (MVE_lastBuffer != NULL) {
         lastMovieBuffer = (unsigned char*)mymalloc(lastMovieBH * lastMovieBW, __FILE__, __LINE__); // "..\\int\\MOVIE.C", 802
         memcpy(lastMovieBuffer, gMovieSdlSurface, lastMovieBW * lastMovieBH);
-        gMovieSdlSurface = NULL;
+        MVE_lastBuffer = NULL;
     }
 
     if (shouldEndMovie) {
@@ -641,7 +633,7 @@ static void cleanupLast()
         lastMovieBuffer = NULL;
     }
 
-    gMovieSdlSurface = NULL;
+    MVE_lastBuffer = NULL;
 }
 
 // 0x479120
