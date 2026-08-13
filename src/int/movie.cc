@@ -104,20 +104,11 @@ static Rect movieRect;
 // 0x637390
 static MovieCallback* movieCallback;
 
-// 0x6373A0
-static MovieEndFunc* endMovieFunc;
-
 // 0x637394
 static MovieUpdateCallbackProc* updateCallbackFunc;
 
-// 0x6373C0
-static MovieFailedOpenFunc* failedOpenFunc;
-
 // 0x6373D4
 static MovieSubtitleFunc* subtitleFilenameFunc;
-
-// 0x6373DC
-static MovieStartFunc* startMovieFunc;
 
 // 0x6373E4
 static int subtitleW;
@@ -136,9 +127,6 @@ static int lastMovieSY;
 
 // 0x6373AC
 static int movieScaleFlag;
-
-// 0x6373B0
-static MoviePreDrawFunc* preDrawFunc;
 
 // 0x6373B4
 static int lastMovieH;
@@ -170,17 +158,11 @@ static int movieH;
 // 0x6373FC
 static int movieOffset;
 
-// 0x6373D0
-static MovieCaptureFrameProc* movieCaptureFrameFunc;
-
 // 0x637410
 static unsigned char* lastMovieBuffer;
 
 // 0x637414
 static int movieW;
-
-// 0x6373D8
-static MovieFrameGrabProc* movieFrameGrabFunc;
 
 // 0x637420
 static int subtitleH;
@@ -207,25 +189,6 @@ static DB_FILE* alphaHandle;
 static unsigned char* alphaBuf;
 
 static unsigned char* MVE_lastBuffer = NULL;
-
-// 0x4783F0
-void movieSetPreDrawFunc(MoviePreDrawFunc* func)
-{
-    preDrawFunc = func;
-}
-
-// 0x4783F8
-void movieSetFailedOpenFunc(MovieFailedOpenFunc* func)
-{
-    failedOpenFunc = func;
-}
-
-// 0x478400
-void movieSetFunc(MovieStartFunc* startFunc, MovieEndFunc* endFunc)
-{
-    startMovieFunc = startFunc;
-    endMovieFunc = endFunc;
-}
 
 // 0x47840C
 static void* movieMalloc(size_t size)
@@ -298,10 +261,6 @@ static void movieDirect(unsigned char* pixels, int src_width, int src_height, in
     destRect.x += winRect.ulx;
     destRect.y += winRect.uly;
 
-    if (movieCaptureFrameFunc != NULL) {
-        movieCaptureFrameFunc(pixels, src_width, src_height, src_width, destRect.x, destRect.y, destRect.w, destRect.h);
-    }
-
     scr_blit(pixels, src_width, src_height, src_x, src_y, dst_width, dst_height, dst_x, dst_y);
     renderPresent();
 }
@@ -323,34 +282,10 @@ static void movieBuffered(unsigned char* pixels, int src_width, int src_height, 
     lastMovieSX = src_x;
     lastMovieSY = src_y;
 
-    if (movieCaptureFrameFunc != NULL) {
-        movieCaptureFrameFunc(pixels, src_width, src_height, src_width, movieRect.ulx, movieRect.uly, dst_width, dst_height);
+    MovieBlitFunc* func = showFrameFuncs[movieAlphaFlag][movieScaleFlag][movieSubRectFlag];
+    if (func(GNWWin, pixels, src_width, src_height, src_width) != 0) {
+        win_draw_rect(GNWWin, &movieRect);
     }
-
-    if (movieFrameGrabFunc != NULL) {
-        movieFrameGrabFunc(pixels, src_width, src_height, src_width);
-    } else {
-        MovieBlitFunc* func = showFrameFuncs[movieAlphaFlag][movieScaleFlag][movieSubRectFlag];
-        if (func(GNWWin, pixels, src_width, src_height, src_width) != 0) {
-            if (preDrawFunc != NULL) {
-                preDrawFunc(GNWWin, &movieRect);
-            }
-
-            win_draw_rect(GNWWin, &movieRect);
-        }
-    }
-}
-
-// 0x4788A8
-void movieSetFrameGrabFunc(MovieFrameGrabProc* func)
-{
-    movieFrameGrabFunc = func;
-}
-
-// 0x4788B0
-void movieSetCaptureFrameFunc(MovieCaptureFrameProc* func)
-{
-    movieCaptureFrameFunc = func;
 }
 
 // 0x478978
@@ -472,10 +407,6 @@ static void cleanupMovie(bool shouldEndMovie)
 {
     if (!running) {
         return;
-    }
-
-    if (endMovieFunc != NULL) {
-        endMovieFunc(GNWWin, movieX, movieY, movieW, movieH);
     }
 
     int frame;
@@ -631,14 +562,8 @@ static DB_FILE* openFile(char* filePath)
 {
     handle = db_fopen(filePath, "rb");
     if (handle == NULL) {
-        if (failedOpenFunc == NULL) {
-            debug_printf("Couldn't find movie file %s\n", filePath);
-            return 0;
-        }
-
-        while (handle == NULL && failedOpenFunc(filePath) != 0) {
-            handle = db_fopen(filePath, "rb");
-        }
+        debug_printf("Couldn't find movie file %s\n", filePath);
+        return 0;
     }
     return handle;
 }
@@ -811,10 +736,6 @@ static int movieStart(int win, char* filePath)
         debug_printf("scaled\n");
     } else {
         debug_printf("not scaled\n");
-    }
-
-    if (startMovieFunc != NULL) {
-        startMovieFunc(GNWWin);
     }
 
     if (alphaHandle != NULL) {
