@@ -513,7 +513,7 @@ int MVE_rmPrepMovie(void* handle, int dx, int dy, unsigned char track)
     }
 
     if (!ioReset(handle)) {
-        _MVE_rmEndMovie();
+        MVE_rmEndMovie();
         return -8;
     }
 
@@ -521,7 +521,7 @@ int MVE_rmPrepMovie(void* handle, int dx, int dy, unsigned char track)
     rm_len = 0;
 
     if (rm_p == NULL) {
-        _MVE_rmEndMovie();
+        MVE_rmEndMovie();
         return -2;
     }
 
@@ -671,7 +671,7 @@ LABEL_5:
     v3 = NULL;
     if (!v1) {
         v6 = -2;
-        _MVE_rmEndMovie();
+        MVE_rmEndMovie();
         return v6;
     }
 
@@ -726,13 +726,13 @@ LABEL_5:
             }
 
             if (!nfConfig(v1[0], v1[1], v10, v9)) {
-                _MVE_rmEndMovie();
+                MVE_rmEndMovie();
                 return -5;
             }
 
             if (rm_dx + nf_width > sf_ScreenWidth
                 || rm_dy + nf_height > sf_ScreenHeight) {
-                _MVE_rmEndMovie();
+                MVE_rmEndMovie();
                 return -6;
             }
 
@@ -825,7 +825,7 @@ LABEL_5:
         }
     }
 
-    _MVE_rmEndMovie();
+    MVE_rmEndMovie();
     return v6;
 }
 
@@ -1287,7 +1287,7 @@ static void palLoadPalette(unsigned char* palette, int start, int count)
 }
 
 // 0x4F6240
-void _MVE_rmEndMovie()
+void MVE_rmEndMovie()
 {
     if (rm_active) {
         syncWait();
@@ -1306,7 +1306,7 @@ static void syncRelease()
 // 0x4F6350
 void MVE_ReleaseMem()
 {
-    _MVE_rmEndMovie();
+    MVE_rmEndMovie();
     ioRelease();
     _MVE_sndRelease();
     _nfRelease();
