@@ -299,17 +299,7 @@ static void movieDirect(unsigned char* pixels, int src_width, int src_height, in
     destRect.y += winRect.uly;
 
     if (movieCaptureFrameFunc != NULL) {
-        if (SDL_LockSurface(surface) == 0) {
-            movieCaptureFrameFunc(static_cast<unsigned char*>(surface->pixels),
-                srcWidth,
-                srcHeight,
-                surface->pitch,
-                destRect.x,
-                destRect.y,
-                destRect.w,
-                destRect.h);
-            SDL_UnlockSurface(surface);
-        }
+        movieCaptureFrameFunc(pixels, src_width, src_height, src_width, destRect.x, destRect.y, destRect.w, destRect.h);
     }
 
     scr_blit(pixels, src_width, src_height, src_x, src_y, dst_width, dst_height, dst_x, dst_y);
@@ -500,7 +490,7 @@ static void cleanupMovie(bool shouldEndMovie)
 
     if (MVE_lastBuffer != NULL) {
         lastMovieBuffer = (unsigned char*)mymalloc(lastMovieBH * lastMovieBW, __FILE__, __LINE__); // "..\\int\\MOVIE.C", 802
-        memcpy(lastMovieBuffer, gMovieSdlSurface, lastMovieBW * lastMovieBH);
+        memcpy(lastMovieBuffer, MVE_lastBuffer, lastMovieBW * lastMovieBH);
         MVE_lastBuffer = NULL;
     }
 
