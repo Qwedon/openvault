@@ -558,28 +558,19 @@ int art_get_code(int animation, int weaponType, char* a3, char* a4)
 // 0x418BFC
 char* art_get_name(int fid)
 {
-    int alias_fid;
-    int index;
-    int anim;
-    int weapon_anim;
-    int type;
-    int v1;
-    char code1;
-    char code2;
+    int rotation = (fid & 0x70000000) >> 28;
 
-    v1 = (fid & 0x70000000) >> 28;
-
-    alias_fid = art_alias_fid(fid);
+    int alias_fid = art_alias_fid(fid);
     if (alias_fid != -1) {
         fid = alias_fid;
     }
 
     *art_name = '\0';
 
-    index = fid & 0xFFF;
-    anim = FID_ANIM_TYPE(fid);
-    weapon_anim = (fid & 0xF000) >> 12;
-    type = FID_TYPE(fid);
+    int index = fid & 0xFFF;
+    int anim = FID_ANIM_TYPE(fid);
+    int weapon_anim = (fid & 0xF000) >> 12;
+    int type = FID_TYPE(fid);
 
     if (index >= art[type].fileNamesLength) {
         return NULL;
@@ -591,11 +582,13 @@ char* art_get_name(int fid)
 
     switch (type) {
     case OBJ_TYPE_CRITTER:
+        char code1;
+        char code2;
         if (art_get_code(anim, weapon_anim, &code1, &code2) == -1) {
             return NULL;
         }
 
-        if (v1) {
+        if (rotation != 0) {
             snprintf(art_name, sizeof(art_name),
                 "%s%s%s\\%s%c%c.fr%c",
                 cd_path_base,
@@ -604,7 +597,7 @@ char* art_get_name(int fid)
                 art[OBJ_TYPE_CRITTER].fileNames + index * 13,
                 code1,
                 code2,
-                v1 + 47);
+                rotation + 47);
         } else {
             snprintf(art_name, sizeof(art_name),
                 "%s%s%s\\%s%c%c.frm",
@@ -991,7 +984,8 @@ static int art_id_internal(unsigned short frmId, unsigned char weaponCode, unsig
 int art_id(int objectType, int frmId, int animType, int weaponCode, int rotation)
 {
     // Always use rotation 0 (NE) for non-critters, for certain critter animations.
-    // For other critter animations, check if art for the given rotation exists, if not try rotation 1 (E) and if that also doesn't exist, then default to 0 (NE).
+    // For other critter animations, check if art for the given rotation exists,
+    // if not try rotation 1 (E) and if that also doesn't exist, then default to 0 (NE).
     if (objectType != OBJ_TYPE_CRITTER
         || animType == ANIM_FIRE_DANCE
         || animType < ANIM_FALL_BACK
@@ -1034,7 +1028,7 @@ static int art_readSubFrameData(unsigned char* data, DB_FILE* stream, int count,
 // 0x41945C
 static int art_readFrameData(Art* art, DB_FILE* stream)
 {
-    if (db_freadInt32(stream, &(art->field_0)) == -1) return -1;
+    if (db_freadInt32(stream, &(art->version)) == -1) return -1;
     if (db_freadInt16(stream, &(art->framesPerSecond)) == -1) return -1;
     if (db_freadInt16(stream, &(art->actionFrame)) == -1) return -1;
     if (db_freadInt16(stream, &(art->frameCount)) == -1) return -1;
@@ -1135,7 +1129,7 @@ static int art_writeSubFrameData(unsigned char* data, DB_FILE* stream, int count
 // 0x419778
 static int art_writeFrameData(Art* art, DB_FILE* stream)
 {
-    if (db_fwriteInt32(stream, art->field_0) == -1) return -1;
+    if (db_fwriteInt32(stream, art->version) == -1) return -1;
     if (db_fwriteInt16(stream, art->framesPerSecond) == -1) return -1;
     if (db_fwriteInt16(stream, art->actionFrame) == -1) return -1;
     if (db_fwriteInt16(stream, art->frameCount) == -1) return -1;

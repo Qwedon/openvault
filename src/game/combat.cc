@@ -2401,9 +2401,13 @@ static bool combat_should_end()
 // 0x420B20
 void combat(CombatStartData* csd)
 {
+    // Both participants (when present) must be on the current elevation.
+    // The original OR allowed e.g. a rat on elev 2 to start combat against the
+    // player on elev 0 — combat then runs with an off-floor attacker that is
+    // never rendered ("invisible enemies"), common in multi-store levels like Vault 15.
     if (csd == NULL
-        || (csd->attacker == NULL || csd->attacker->elevation == map_elevation)
-        || (csd->defender == NULL || csd->defender->elevation == map_elevation)) {
+        || ((csd->attacker == NULL || csd->attacker->elevation == map_elevation)
+            && (csd->defender == NULL || csd->defender->elevation == map_elevation))) {
         bool wasInCombat = (combat_state & 0x01) != 0;
 
         combat_begin(NULL);

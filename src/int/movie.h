@@ -23,18 +23,8 @@ typedef enum MovieExtendedFlags {
 typedef char*(MovieSubtitleFunc)(char* movieFilePath);
 typedef void(MoviePaletteFunc)(unsigned char* palette, int start, int end);
 typedef void(MovieUpdateCallbackProc)(int frame);
-typedef void(MovieFrameGrabProc)(unsigned char* data, int width, int height, int pitch);
-typedef void(MovieCaptureFrameProc)(unsigned char* data, int width, int height, int pitch, int movieX, int movieY, int movieWidth, int movieHeight);
-typedef void(MoviePreDrawFunc)(int win, Rect* rect);
-typedef void(MovieStartFunc)(int win);
-typedef void(MovieEndFunc)(int win, int x, int y, int width, int height);
-typedef int(MovieFailedOpenFunc)(char* path);
+typedef int(MovieBlitFunc)(int win, unsigned char* data, int width, int height, int pitch);
 
-void movieSetPreDrawFunc(MoviePreDrawFunc* func);
-void movieSetFailedOpenFunc(MovieFailedOpenFunc* func);
-void movieSetFunc(MovieStartFunc* startFunc, MovieEndFunc* endFunc);
-void movieSetFrameGrabFunc(MovieFrameGrabProc* func);
-void movieSetCaptureFrameFunc(MovieCaptureFrameProc* func);
 void initMovie();
 void movieClose();
 void movieStop();

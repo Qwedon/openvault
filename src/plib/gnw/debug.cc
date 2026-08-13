@@ -36,6 +36,10 @@ static DebugFunc* debug_func = NULL;
 void GNW_debug_init()
 {
     atexit(debug_exit);
+
+    // Original game enabled this via DEBUGACTIVE; CE never called it, so
+    // `$env:DEBUGACTIVE="log"` produced no debug.log.
+    debug_register_env();
 }
 
 // 0x4B2D9C
@@ -58,9 +62,12 @@ void debug_register_log(const char* fileName, const char* mode)
     if ((mode[0] == 'w' || mode[0] == 'a') && mode[1] == 't') {
         if (fd != NULL) {
             fclose(fd);
+            fd = NULL;
         }
 
         fd = compat_fopen(fileName, mode);
+
+        // Still attach the logger even if open failed so Debug SDL_Log path stays unused.
         debug_func = debug_log;
     }
 }

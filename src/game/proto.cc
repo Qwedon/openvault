@@ -450,7 +450,7 @@ int proto_read_protoUpdateData(Object* obj, DB_FILE* stream)
     if (db_freadInt32(stream, &temp) == -1) return -1;
 
     if (PID_TYPE(obj->pid) == OBJ_TYPE_CRITTER) {
-        if (db_freadInt32(stream, &(obj->data.critter.field_0)) == -1) return -1;
+        if (db_freadInt32(stream, &(obj->data.critter.reaction)) == -1) return -1;
         if (proto_read_CombatData(&(obj->data.critter.combat), stream) == -1) return -1;
         if (db_freadInt32(stream, &(obj->data.critter.hp)) == -1) return -1;
         if (db_freadInt32(stream, &(obj->data.critter.radiation)) == -1) return -1;

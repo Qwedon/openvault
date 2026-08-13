@@ -24,7 +24,6 @@
 namespace fallout {
 
 typedef void(MovieCallback)();
-typedef int(MovieBlitFunc)(int win, unsigned char* data, int width, int height, int pitch);
 
 typedef struct MovieSubtitleListNode {
     int num;
@@ -35,8 +34,8 @@ typedef struct MovieSubtitleListNode {
 static void* movieMalloc(size_t size);
 static void movieFree(void* ptr);
 static bool movieRead(void* handle, void* buf, int count);
-static void movieDirect(SDL_Surface* surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9);
-static void movieBuffered(SDL_Surface* surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9);
+static void movieDirect(unsigned char* pixels, int src_width, int src_height, int src_x, int src_y, int dst_width, int dst_height, int dst_x, int dst_y);
+static void movieBuffered(unsigned char* pixels, int src_width, int src_height, int src_x, int src_y, int dst_width, int dst_height, int dst_x, int dst_y);
 static int movieScaleSubRect(int win, unsigned char* data, int width, int height, int pitch);
 static int movieScaleWindowAlpha(int win, unsigned char* data, int width, int height, int pitch);
 static int movieScaleSubRectAlpha(int win, unsigned char* data, int width, int height, int pitch);
@@ -44,7 +43,7 @@ static int blitAlpha(int win, unsigned char* data, int width, int height, int pi
 static int movieScaleWindow(int win, unsigned char* data, int width, int height, int pitch);
 static int blitNormal(int win, unsigned char* data, int width, int height, int pitch);
 static void movieSetPalette(unsigned char* palette, int start, int end);
-static void cleanupMovie(int a1);
+static void cleanupMovie(bool shouldEndMovie);
 static void cleanupLast();
 static DB_FILE* openFile(char* filePath);
 static void openSubtitle(char* filePath);
@@ -104,20 +103,11 @@ static Rect movieRect;
 // 0x637390
 static MovieCallback* movieCallback;
 
-// 0x6373A0
-static MovieEndFunc* endMovieFunc;
-
 // 0x637394
 static MovieUpdateCallbackProc* updateCallbackFunc;
 
-// 0x6373C0
-static MovieFailedOpenFunc* failedOpenFunc;
-
 // 0x6373D4
 static MovieSubtitleFunc* subtitleFilenameFunc;
-
-// 0x6373DC
-static MovieStartFunc* startMovieFunc;
 
 // 0x6373E4
 static int subtitleW;
@@ -136,9 +126,6 @@ static int lastMovieSY;
 
 // 0x6373AC
 static int movieScaleFlag;
-
-// 0x6373B0
-static MoviePreDrawFunc* preDrawFunc;
 
 // 0x6373B4
 static int lastMovieH;
@@ -170,17 +157,11 @@ static int movieH;
 // 0x6373FC
 static int movieOffset;
 
-// 0x6373D0
-static MovieCaptureFrameProc* movieCaptureFrameFunc;
-
 // 0x637410
 static unsigned char* lastMovieBuffer;
 
 // 0x637414
 static int movieW;
-
-// 0x6373D8
-static MovieFrameGrabProc* movieFrameGrabFunc;
 
 // 0x637420
 static int subtitleH;
@@ -206,26 +187,7 @@ static DB_FILE* alphaHandle;
 // 0x637418
 static unsigned char* alphaBuf;
 
-static SDL_Surface* gMovieSdlSurface = NULL;
-
-// 0x4783F0
-void movieSetPreDrawFunc(MoviePreDrawFunc* func)
-{
-    preDrawFunc = func;
-}
-
-// 0x4783F8
-void movieSetFailedOpenFunc(MovieFailedOpenFunc* func)
-{
-    failedOpenFunc = func;
-}
-
-// 0x478400
-void movieSetFunc(MovieStartFunc* startFunc, MovieEndFunc* endFunc)
-{
-    startMovieFunc = startFunc;
-    endMovieFunc = endFunc;
-}
+static unsigned char* MVE_lastBuffer = NULL;
 
 // 0x47840C
 static void* movieMalloc(size_t size)
@@ -246,129 +208,83 @@ static bool movieRead(void* handle, void* buf, int count)
 }
 
 // 0x478464
-static void movieDirect(SDL_Surface* surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9)
+static void movieDirect(unsigned char* pixels, int src_width, int src_height, int src_x, int src_y, int dst_width, int dst_height, int dst_x, int dst_y)
 {
-    int v14;
-    int v15;
+    int movWinWidth;
+    int movWinSpan;
 
     SDL_Rect srcRect;
-    srcRect.x = srcX;
-    srcRect.y = srcY;
-    srcRect.w = srcWidth;
-    srcRect.h = srcHeight;
+    srcRect.x = src_x;
+    srcRect.y = src_y;
+    srcRect.w = src_width;
+    srcRect.h = src_height;
 
-    v14 = winRect.lrx - winRect.ulx;
-    v15 = winRect.lrx - winRect.ulx + 1;
+    movWinWidth = winRect.lrx - winRect.ulx;
+    movWinSpan = movWinWidth + 1;
 
     SDL_Rect destRect;
 
     if (movieScaleFlag) {
         if ((movieFlags & MOVIE_EXTENDED_FLAG_0x08) != 0) {
-            destRect.y = (winRect.lry - winRect.uly + 1 - destHeight) / 2;
-            destRect.x = (v15 - 4 * srcWidth / 3) / 2;
+            destRect.y = (winRect.lry - winRect.uly + 1 - dst_height) / 2;
+            destRect.x = (movWinSpan - 4 * src_width / 3) / 2;
         } else {
             destRect.y = movieY + winRect.uly;
             destRect.x = winRect.ulx + movieX;
         }
 
-        destRect.w = 4 * srcWidth / 3 + destRect.x;
-        destRect.h = destHeight + destRect.y;
+        destRect.w = 4 * src_width / 3 + destRect.x;
+        destRect.h = dst_height + destRect.y;
     } else {
         if ((movieFlags & MOVIE_EXTENDED_FLAG_0x08) != 0) {
-            destRect.y = (winRect.lry - winRect.uly + 1 - destHeight) / 2;
-            destRect.x = (v15 - destWidth) / 2;
+            destRect.y = (winRect.lry - winRect.uly + 1 - dst_height) / 2;
+            destRect.x = (movWinSpan - dst_width) / 2;
         } else {
             destRect.y = movieY + winRect.uly;
             destRect.x = winRect.ulx + movieX;
         }
-        destRect.w = destWidth;
-        destRect.h = destHeight;
+        destRect.w = dst_width;
+        destRect.h = dst_height;
     }
 
-    lastMovieSX = srcX;
-    lastMovieSY = srcY;
+    lastMovieSX = src_x;
+    lastMovieSY = src_y;
     lastMovieX = destRect.x;
     lastMovieY = destRect.y;
-    lastMovieBH = srcHeight;
+    lastMovieBH = src_height;
     lastMovieW = destRect.w;
-    gMovieSdlSurface = surface;
-    lastMovieBW = srcWidth;
+    MVE_lastBuffer = pixels;
+    lastMovieBW = src_width;
     lastMovieH = destRect.h;
 
     destRect.x += winRect.ulx;
     destRect.y += winRect.uly;
 
-    if (movieCaptureFrameFunc != NULL) {
-        if (SDL_LockSurface(surface) == 0) {
-            movieCaptureFrameFunc(static_cast<unsigned char*>(surface->pixels),
-                srcWidth,
-                srcHeight,
-                surface->pitch,
-                destRect.x,
-                destRect.y,
-                destRect.w,
-                destRect.h);
-            SDL_UnlockSurface(surface);
-        }
-    }
-
-    SDL_SetSurfacePalette(surface, gSdlSurface->format->palette);
-    SDL_BlitSurface(surface, &srcRect, gSdlSurface, &destRect);
-    SDL_BlitSurface(gSdlSurface, NULL, gSdlTextureSurface, NULL);
+    scr_blit(pixels, src_width, src_height, src_x, src_y, dst_width, dst_height, dst_x, dst_y);
     renderPresent();
 }
 
 // 0x478710
-static void movieBuffered(SDL_Surface* surface, int srcWidth, int srcHeight, int srcX, int srcY, int destWidth, int destHeight, int a8, int a9)
+static void movieBuffered(unsigned char* pixels, int src_width, int src_height, int src_x, int src_y, int dst_width, int dst_height, int dst_x, int dst_y)
 {
     if (GNWWin == -1) {
         return;
     }
 
-    lastMovieBW = srcWidth;
-    gMovieSdlSurface = surface;
-    lastMovieBH = srcWidth;
-    lastMovieW = destWidth;
-    lastMovieH = destHeight;
-    lastMovieX = srcX;
-    lastMovieY = srcY;
-    lastMovieSX = srcX;
-    lastMovieSY = srcY;
+    lastMovieBW = src_width;
+    MVE_lastBuffer = pixels;
+    lastMovieBH = src_width;
+    lastMovieW = dst_width;
+    lastMovieH = dst_height;
+    lastMovieX = src_x;
+    lastMovieY = src_y;
+    lastMovieSX = src_x;
+    lastMovieSY = src_y;
 
-    if (SDL_LockSurface(surface) != 0) {
-        return;
+    MovieBlitFunc* func = showFrameFuncs[movieAlphaFlag][movieScaleFlag][movieSubRectFlag];
+    if (func(GNWWin, pixels, src_width, src_height, src_width) != 0) {
+        win_draw_rect(GNWWin, &movieRect);
     }
-
-    if (movieCaptureFrameFunc != NULL) {
-        movieCaptureFrameFunc(static_cast<unsigned char*>(surface->pixels), srcWidth, srcHeight, surface->pitch, movieRect.ulx, movieRect.uly, destWidth, destHeight);
-    }
-
-    if (movieFrameGrabFunc != NULL) {
-        movieFrameGrabFunc(static_cast<unsigned char*>(surface->pixels), srcWidth, srcHeight, surface->pitch);
-    } else {
-        MovieBlitFunc* func = showFrameFuncs[movieAlphaFlag][movieScaleFlag][movieSubRectFlag];
-        if (func(GNWWin, static_cast<unsigned char*>(surface->pixels), srcWidth, srcHeight, surface->pitch) != 0) {
-            if (preDrawFunc != NULL) {
-                preDrawFunc(GNWWin, &movieRect);
-            }
-
-            win_draw_rect(GNWWin, &movieRect);
-        }
-    }
-
-    SDL_UnlockSurface(surface);
-}
-
-// 0x4788A8
-void movieSetFrameGrabFunc(MovieFrameGrabProc* func)
-{
-    movieFrameGrabFunc = func;
-}
-
-// 0x4788B0
-void movieSetCaptureFrameFunc(MovieCaptureFrameProc* func)
-{
-    movieCaptureFrameFunc = func;
 }
 
 // 0x478978
@@ -486,14 +402,10 @@ void initMovie()
 }
 
 // 0x478CA8
-static void cleanupMovie(int a1)
+static void cleanupMovie(bool shouldEndMovie)
 {
     if (!running) {
         return;
-    }
-
-    if (endMovieFunc != NULL) {
-        endMovieFunc(GNWWin, movieX, movieY, movieW, movieH);
     }
 
     int frame;
@@ -506,14 +418,14 @@ static void cleanupMovie(int a1)
         lastMovieBuffer = NULL;
     }
 
-    if (gMovieSdlSurface != NULL) {
+    if (MVE_lastBuffer != NULL) {
         lastMovieBuffer = (unsigned char*)mymalloc(lastMovieBH * lastMovieBW, __FILE__, __LINE__); // "..\\int\\MOVIE.C", 802
-        memcpy(lastMovieBuffer, gMovieSdlSurface, lastMovieBW * lastMovieBH);
-        gMovieSdlSurface = NULL;
+        memcpy(lastMovieBuffer, MVE_lastBuffer, lastMovieBW * lastMovieBH);
+        MVE_lastBuffer = NULL;
     }
 
-    if (a1) {
-        _MVE_rmEndMovie();
+    if (shouldEndMovie) {
+        MVE_rmEndMovie();
     }
 
     MVE_ReleaseMem();
@@ -641,7 +553,7 @@ static void cleanupLast()
         lastMovieBuffer = NULL;
     }
 
-    gMovieSdlSurface = NULL;
+    MVE_lastBuffer = NULL;
 }
 
 // 0x479120
@@ -649,14 +561,8 @@ static DB_FILE* openFile(char* filePath)
 {
     handle = db_fopen(filePath, "rb");
     if (handle == NULL) {
-        if (failedOpenFunc == NULL) {
-            debug_printf("Couldn't find movie file %s\n", filePath);
-            return 0;
-        }
-
-        while (handle == NULL && failedOpenFunc(filePath) != 0) {
-            handle = db_fopen(filePath, "rb");
-        }
+        debug_printf("Couldn't find movie file %s\n", filePath);
+        return 0;
     }
     return handle;
 }
@@ -831,10 +737,6 @@ static int movieStart(int win, char* filePath)
         debug_printf("not scaled\n");
     }
 
-    if (startMovieFunc != NULL) {
-        startMovieFunc(GNWWin);
-    }
-
     if (alphaHandle != NULL) {
         unsigned long size;
         db_freadLong(alphaHandle, &size);
@@ -911,15 +813,13 @@ int movieRunRect(int win, char* filePath, int a3, int a4, int a5, int a6)
 // 0x479980
 static int stepMovie()
 {
-    int rc;
-
     if (alphaHandle != NULL) {
         unsigned long size;
         db_freadLong(alphaHandle, &size);
         db_fread(alphaBuf, 1, size, alphaHandle);
     }
 
-    rc = _MVE_rmStepMovie();
+    int rc = _MVE_rmStepMovie();
     if (rc != -1) {
         doSubtitle();
     }

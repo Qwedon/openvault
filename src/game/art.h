@@ -66,7 +66,7 @@ typedef enum Background {
 } Background;
 
 typedef struct Art {
-    int field_0;
+    int version;
     short framesPerSecond;
     short actionFrame;
     short frameCount;
