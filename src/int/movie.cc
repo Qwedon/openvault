@@ -814,15 +814,13 @@ int movieRunRect(int win, char* filePath, int a3, int a4, int a5, int a6)
 // 0x479980
 static int stepMovie()
 {
-    int rc;
-
     if (alphaHandle != NULL) {
         unsigned long size;
         db_freadLong(alphaHandle, &size);
         db_fread(alphaBuf, 1, size, alphaHandle);
     }
 
-    rc = _MVE_rmStepMovie();
+    int rc = _MVE_rmStepMovie();
     if (rc != -1) {
         doSubtitle();
     }
