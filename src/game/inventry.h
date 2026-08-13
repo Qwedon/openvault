@@ -75,7 +75,7 @@ Object* inven_find_type(Object* obj, int a2, int* inout_a3);
 Object* inven_find_id(Object* obj, int a2);
 Object* inven_index_ptr(Object* obj, int a2);
 int inven_wield(Object* critter, Object* item, int a3);
-int inven_unwield(Object* critter, int a2);
+int inven_unwield(Object* critter, int hand);
 int inven_from_button(int input, Object** a2, Object*** a3, Object** a4);
 void inven_display_msg(char* string);
 void inven_obj_examine_func(Object* critter, Object* item);
