@@ -24,7 +24,6 @@
 namespace fallout {
 
 typedef void(MovieCallback)();
-typedef int(MovieBlitFunc)(int win, unsigned char* data, int width, int height, int pitch);
 
 typedef struct MovieSubtitleListNode {
     int num;
