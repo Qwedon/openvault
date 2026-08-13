@@ -731,7 +731,7 @@ LABEL_5:
             }
 
             if (rm_dx + nf_width > sf_ScreenWidth
-                || rm_dy + _mveBH > sf_ScreenHeight) {
+                || rm_dy + nf_height > sf_ScreenHeight) {
                 _MVE_rmEndMovie();
                 return -6;
             }
@@ -1230,7 +1230,7 @@ static void movieSwapSurfaces()
 static void sfShowFrame(int dst_x, int dst_y, int a3)
 {
     dst_x = (sf_ScreenWidth - nf_width) / 2;
-    dst_y = (sf_ScreenHeight - _mveBH) / 2;
+    dst_y = (sf_ScreenHeight - nf_height) / 2;
 
     if (a3 == 0) {
         sf_ShowFrame(nf_buf_cur, nf_width, nf_height, 0, 0, nf_width, nf_height, dst_x, dst_y);
