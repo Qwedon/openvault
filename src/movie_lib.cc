@@ -49,7 +49,7 @@ static int syncWaitLevel(int wait);
 static void _CallsSndBuff_Loc(unsigned char* a1, int a2);
 static int _MVE_sndAdd(unsigned char* dest, unsigned char** src_ptr, int a3, int a4, int a5);
 static void _MVE_sndResume();
-static int _nfConfig(int a1, int a2, int a3, int is_16_bpp);
+static int nfConfig(int width, int height, int a3, int is_16_bpp);
 static void movieSwapSurfaces();
 static void sfShowFrame(int dst_x, int dst_y, int a3);
 static void _do_nothing_(int a1, int a2, unsigned short* a3);
@@ -725,7 +725,7 @@ LABEL_5:
                 v10 = v1[2];
             }
 
-            if (!_nfConfig(v1[0], v1[1], v10, v9)) {
+            if (!nfConfig(v1[0], v1[1], v10, v9)) {
                 _MVE_rmEndMovie();
                 return -5;
             }
@@ -1194,7 +1194,7 @@ static void _MVE_sndResume()
 }
 
 // 0x4F5CB0
-static int _nfConfig(int width, int height, int a3, int is_16_bpp)
+static int nfConfig(int width, int height, int a3, int is_16_bpp)
 {
     byte_6B4016 = a3;
     nf_width = 8 * width;
