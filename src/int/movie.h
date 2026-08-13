@@ -24,11 +24,6 @@ typedef char*(MovieSubtitleFunc)(char* movieFilePath);
 typedef void(MoviePaletteFunc)(unsigned char* palette, int start, int end);
 typedef void(MovieUpdateCallbackProc)(int frame);
 
-void movieSetPreDrawFunc(MoviePreDrawFunc* func);
-void movieSetFailedOpenFunc(MovieFailedOpenFunc* func);
-void movieSetFunc(MovieStartFunc* startFunc, MovieEndFunc* endFunc);
-void movieSetFrameGrabFunc(MovieFrameGrabProc* func);
-void movieSetCaptureFrameFunc(MovieCaptureFrameProc* func);
 void initMovie();
 void movieClose();
 void movieStop();
