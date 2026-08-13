@@ -123,6 +123,9 @@ static int mve_volume = 0;
 // 0x51EE08
 static MveShowFrameFunc* sf_ShowFrame;
 
+// 0x51EE0C
+static int dword_51EE0C = 1;
+
 // 0x51EE14
 static MveSetPaletteFunc* pal_SetPalette;
 
@@ -385,9 +388,6 @@ static int dword_6B3D00;
 // 0x6B3D0C
 static unsigned char pal_tbl[768];
 
-// 0x6B4012
-static int dword_6B4012;
-
 // 0x6B4016
 static unsigned char byte_6B4016;
 
@@ -469,7 +469,7 @@ void MveSetScreenSize(int width, int height)
 {
     sf_ScreenWidth = width;
     sf_ScreenHeight = height;
-    dword_6B4012 = 1;
+    dword_51EE0C = 0;
 }
 
 // 0x4F49F0
@@ -778,7 +778,12 @@ LABEL_5:
             }
             continue;
         case 10:
+            if (!dword_51EE0C) {
+                continue;
+            }
+
             // TODO: Probably never reached.
+
         case 11:
             // some kind of palette rotation
             palMakeSynthPalette(v1[0], v1[1], v1[2], v1[3], v1[4], v1[5]);
