@@ -426,7 +426,7 @@ static void cleanupMovie(bool shouldEndMovie)
     }
 
     if (shouldEndMovie) {
-        _MVE_rmEndMovie();
+        MVE_rmEndMovie();
     }
 
     MVE_ReleaseMem();
